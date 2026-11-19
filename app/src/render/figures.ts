@@ -268,7 +268,8 @@ export class Figures {
     const skirts = new Map<string, Shape[]>();
     for (const s of shapes) {
       if (s.t === "x" || s.nod || s.bar || s.part === "torso") continue; // collision-only volumes; the torso is drawn as one surface instead
-      if (hide && !!s.lead === (hide === "l") && (s.torso || s.t === "h")) continue;
+      // your own skirt and thighs go too: looking down, they would cover the feet you are trying to watch
+      if (hide && !!s.lead === (hide === "l") && (s.torso || s.t === "h" || s.skirt || s.part === "thigh")) continue;
       if (s.t === "c") this.capsule(s.a as V, s.b as V, s.wa!, s.wb!, s.col!, !!s.flat);
       else if (s.t === "o") this.ball(s.p as V, s.r!, s.col!, !!s.flat);
       else if (s.t === "h") {
