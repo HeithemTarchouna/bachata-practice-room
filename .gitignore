@@ -1,0 +1,15 @@
+# never publish: the course video and anything made from it
+*.mp4
+sheets/
+course_transcript.txt
+screenshots/
+videos/
+# personal motion files and models
+*.poses.json
+*.pt
+# build output and dependencies
+node_modules/
+app/dist/
+__pycache__/
+*.pyc
+.claude/

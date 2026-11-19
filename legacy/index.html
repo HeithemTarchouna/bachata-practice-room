@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bachata practice room</title>
+<script>try{var th=localStorage.getItem('bpr-theme');if(th!=='light'&&th!=='dark')th=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',th)}catch(e){document.documentElement.setAttribute('data-theme','light')}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F1EFF6;--surface:#FFFFFF;--panel:#F7F5FA;--ink:#221B2F;--muted:#675E78;--line:#E0DBE9;--line2:#CBC4D9;--lead:#0F7F6E;--leadbg:#DDF2EE;--fol:#C2416B;--bad:#BF3A22;--badbg:#FBE4DE;--tap:#8A5F06;--tapbg:#F8E7BC;--floor:#D5CFE1;--join:#D79A12;--skin:#E6C1A3;--hair:#2A1F1C;--stage1:#FDFCFE;--stage2:#EAE6F2;--shadow:0 1px 2px rgba(34,27,47,.05),0 8px 24px rgba(34,27,47,.07);--disp:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;--text:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:light;box-sizing:border-box}
+:root[data-theme="dark"]{--bg:#14101D;--surface:#1E1829;--panel:#251E33;--ink:#EFEAF6;--muted:#A99FBB;--line:#30283F;--line2:#463B58;--lead:#4FC9B2;--leadbg:#17393A;--fol:#F07A9C;--bad:#FF7A66;--badbg:#3E2220;--tap:#F2C14E;--tapbg:#3D3220;--floor:#3A3150;--join:#F2C14E;--skin:#D8AD8C;--hair:#6A4A40;--stage1:#2A2239;--stage2:#191421;--shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.28);color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html{scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--text);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;color:inherit}
+svg{display:block}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,label.chip:focus-within{outline:3px solid var(--join);outline-offset:2px}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) 20px 10px;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.logo{flex:none;width:36px;height:36px;border-radius:11px;background:var(--ink);color:var(--bg);display:grid;place-items:center}
+.logo svg{width:22px;height:22px}
+.brand b{display:block;font:800 17px/1.15 var(--disp);letter-spacing:-.01em;white-space:nowrap}
+.brand span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topActions{display:flex;gap:8px;align-items:center}
+.ghost{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 12px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);font:700 14px var(--text);cursor:pointer}
+.ghost svg{width:18px;height:18px}
+.ghost.sq{width:38px;padding:0;justify-content:center}
+.ghost:hover{border-color:var(--ink)}
+:root[data-theme="dark"] .sun,:root:not([data-theme="dark"]) .moon{display:none}
+
+/* layout */
+.app{max-width:1500px;margin:0 auto;padding:16px 16px 48px;display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.eyebrow{margin:0;font:700 12px/1.3 var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+
+/* move library: a scrolling strip on small screens, a sidebar on wide ones */
+.lib{min-width:0}
+.chips{display:flex;gap:8px;align-items:center;overflow-x:auto;margin:0 -16px;padding:2px 16px 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chipsep{flex:none;font:700 11.5px var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:0 2px 0 10px}
+.chipsep:first-child{padding-left:0}
+.chip{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:7px 8px 7px 14px;font:700 15px var(--text);cursor:pointer;white-space:nowrap}
+.chip .ct{font:700 11.5px var(--disp);min-width:24px;padding:2px 6px;border-radius:999px;background:var(--panel);color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-pressed="true"] .ct{background:color-mix(in srgb,var(--bg) 18%,transparent);color:var(--bg)}
+.chip.file{border-style:dashed;position:relative;padding-right:14px;color:var(--muted)}
+.chip.file svg{width:16px;height:16px}
+.chip.file input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+
+/* main column */
+.work{min-width:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);align-content:start}
+.titleRow{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.titleRow>div:first-child{min-width:0;flex:1 1 320px}
+h1{font:800 30px/1.08 var(--disp);letter-spacing:-.015em;margin:3px 0 6px}
+.about{margin:0;color:var(--muted);font-size:15.5px;max-width:64ch}
+.seg{display:inline-flex;padding:3px;gap:2px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.seg button{border:0;background:transparent;color:var(--muted);border-radius:9px;padding:8px 14px;font:700 14.5px var(--text);cursor:pointer;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(34,27,47,.14),0 0 0 1px var(--line)}
+.seg button.badm[aria-pressed="true"]{background:var(--bad);color:#fff;box-shadow:none}
+.seg button:disabled{opacity:.4;cursor:default}
+
+.stage{position:relative;border-radius:18px;border:1px solid var(--line);background:radial-gradient(120% 85% at 50% 72%,var(--stage1),var(--stage2));overflow:hidden;touch-action:none;box-shadow:var(--shadow)}
+.stage.bad{border-color:var(--bad);box-shadow:0 0 0 2px var(--bad),var(--shadow)}
+canvas{display:block;width:100%;cursor:grab}
+canvas:active{cursor:grabbing}
+.count{position:absolute;left:16px;top:8px;font:800 80px/1 var(--disp);color:var(--ink);pointer-events:none;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.count.tap{color:var(--tap)}
+.count small{display:block;font:700 13.5px var(--text);letter-spacing:0;color:var(--muted);margin-top:2px}
+.views{position:absolute;right:12px;top:12px;display:flex;padding:3px;gap:2px;border-radius:11px;background:color-mix(in srgb,var(--surface) 86%,transparent);border:1px solid var(--line);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.views button{border:0;background:transparent;color:var(--muted);border-radius:8px;padding:6px 10px;font:700 13px var(--text);cursor:pointer}
+.views button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.zoom{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;border-radius:11px;overflow:hidden;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 86%,transparent)}
+.zoom button{width:34px;height:32px;border:0;background:transparent;font:700 18px/1 var(--disp);cursor:pointer;color:var(--ink)}
+.zoom button+button{border-top:1px solid var(--line)}
+.zoom button:hover{background:var(--panel)}
+.hint{position:absolute;left:14px;bottom:12px;margin:0;font-size:12.5px;color:var(--muted);pointer-events:none}
+.stage.bad .hint{color:var(--bad);font-weight:700}
+
+/* transport */
+.transport{padding:12px 14px;display:grid;gap:12px}
+.trow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pbtns{display:flex;gap:6px;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:42px;min-width:42px;padding:0 12px;border:1px solid var(--line2);background:var(--surface);border-radius:12px;font:700 15px var(--text);cursor:pointer}
+.btn svg{width:20px;height:20px}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);min-width:104px}
+.btn.tog[aria-pressed="false"]{color:var(--muted);background:var(--panel)}
+.btn.tog[aria-pressed="true"]{border-color:var(--lead);color:var(--lead);background:var(--leadbg)}
+.btn.sm{height:36px;min-width:0;padding:0 11px;font-size:14px;border-radius:10px}
+.btn.sm[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.beats{flex:1 1 300px;display:grid;grid-template-columns:repeat(8,1fr);gap:4px;min-width:0}
+.beat{height:42px;border-radius:9px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;font:700 14px var(--disp);color:var(--muted);cursor:pointer;padding:0;font-variant-numeric:tabular-nums}
+.beat:hover{border-color:var(--ink);color:var(--ink)}
+.beat.tapc{background:var(--tapbg);color:var(--tap);border-color:transparent;font-size:12px}
+.beat.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.beat.seg0{box-shadow:inset 3px 0 0 var(--lead)}
+.beats.long{gap:3px}
+.beats.long .beat{height:26px;font-size:12px;border-radius:6px}
+.beats.long .beat.tapc{font-size:0}
+.beats.long .beat.tapc::after{content:"•";font-size:14px}
+.tempo{display:flex;align-items:center;gap:10px;flex:1 1 220px;min-width:0}
+.tempo label{font:700 13px var(--text);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.tempo input{flex:1;min-width:80px;accent-color:var(--lead)}
+.tempo output{font:800 15px var(--disp);min-width:68px;text-align:right;font-variant-numeric:tabular-nums}
+.presets{display:flex;gap:4px}
+.toggles{display:flex;gap:6px;margin-left:auto}
+
+/* real motion bar */
+.mbar{display:grid;gap:10px;padding:14px}
+.mbar input[type=range]{width:100%;accent-color:var(--lead)}
+.mrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mrow select{font:700 14px var(--text);padding:6px 8px;border-radius:10px;border:1px solid var(--line2);background:var(--surface);color:var(--ink)}
+.minfo{font-size:14px;color:var(--muted)}
+body.motion .simonly{display:none!important}
+
+/* coaching column */
+.side{min-width:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);align-content:start}
+.cueCard{padding:16px 18px 16px;border-left:4px solid var(--lead)}
+.cueCard.bad{border-left-color:var(--bad)}
+.cue{margin:6px 0 0;font:700 21px/1.32 var(--text);min-height:2.64em}
+.cue.bad{color:var(--bad)}
+.fix{margin:8px 0 0;font-size:16px;color:var(--muted)}
+.fix b{color:var(--ink)}
+.nextCue{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:14.5px;color:var(--muted)}
+.nextCue b{color:var(--ink)}
+.details{padding:16px 18px}
+.details h2{font:800 17px var(--disp);margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.details h2+ul{margin-bottom:16px}
+.details h2 i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--leadbg);color:var(--lead)}
+.details h2.err i{background:var(--badbg);color:var(--bad)}
+.details h2 svg{width:14px;height:14px}
+.details ul{margin:0;padding:0;list-style:none}
+.details li{position:relative;padding:7px 0 7px 16px;border-top:1px solid var(--line);font-size:15.5px}
+.details li:first-child{border-top:0}
+.details li::before{content:"";position:absolute;left:2px;top:17px;width:5px;height:5px;border-radius:50%;background:var(--line2)}
+.note{font-size:13.5px;color:var(--muted);margin:14px 0 0}
+.legend{padding:4px 18px}
+.legend summary{cursor:pointer;font:700 15px var(--text);padding:10px 0;list-style:none;display:flex;align-items:center;justify-content:space-between}
+.legend summary::-webkit-details-marker{display:none}
+.legend summary::after{content:"+";font:700 20px/1 var(--disp);color:var(--muted)}
+.legend[open] summary::after{content:"–"}
+.legend dl{margin:0 0 12px;display:grid;grid-template-columns:auto 1fr;gap:9px 12px;align-items:center;font-size:14.5px}
+.legend dt{display:flex;justify-content:center;width:34px}
+.legend dd{margin:0;color:var(--muted)}
+.legend dd b{color:var(--ink)}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%}
+.sw.ring{background:transparent;border:3px solid var(--join)}
+.sw.shadow{width:22px;height:10px;background:var(--lead);opacity:.3}
+.sw.foot{width:24px;height:12px;border:2px solid var(--lead);background:color-mix(in srgb,var(--lead) 16%,transparent)}
+.sw.foot.dash{border-style:dashed;background:transparent}
+.sw.arrow{width:24px;height:4px;border-radius:2px;background:var(--join)}
+.sw.arc{width:22px;height:12px;border-radius:0;border:3px solid var(--fol);border-top:0;border-radius:0 0 14px 14px;background:transparent}
+
+/* help dialog */
+dialog{border:1px solid var(--line);border-radius:18px;padding:0;background:var(--surface);color:var(--ink);box-shadow:0 24px 80px rgba(0,0,0,.35);width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px)}
+dialog::backdrop{background:rgba(20,16,29,.5)}
+.dlg{padding:20px 22px 22px}
+.dlg h2{font:800 22px var(--disp);margin:0 0 4px}
+.dlg h3{font:700 12px var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:18px 0 6px}
+.dlg ol{margin:0;padding-left:20px}
+.dlg li{margin:5px 0}
+.dlg p{margin:6px 0;color:var(--muted);font-size:14.5px}
+.dlgTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.keysGrid{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:15px;align-items:center}
+kbd{font:700 12px ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;padding:2px 6px;background:var(--panel);color:var(--ink)}
+
+@media (min-width:900px){
+  .app{grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);padding:18px 20px 56px;gap:20px}
+  .lib{grid-column:1/-1}
+  .chips{margin:0;padding:2px 0 4px;flex-wrap:wrap;overflow:visible}
+  .cue{font-size:22px}
+}
+@media (min-width:1280px){
+  .app{grid-template-columns:236px minmax(0,1fr) 372px;align-items:start;gap:24px}
+  .lib{grid-column:auto;position:sticky;top:76px;max-height:calc(100vh - 92px);overflow:auto;padding:12px 10px 12px}
+  .lib.card{border-radius:16px}
+  .chips{display:grid;gap:2px;padding:0}
+  .chipsep{padding:14px 8px 6px}
+  .chipsep:first-child{padding-top:2px}
+  .chip{width:100%;justify-content:space-between;border:0;border-radius:10px;background:transparent;padding:8px 8px 8px 10px;font-size:15px;text-align:left;white-space:normal}
+  .chip:hover{background:var(--panel)}
+  .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+  .chip.file{border:1px dashed var(--line2);justify-content:flex-start;margin-top:2px}
+  .side{position:sticky;top:76px;max-height:calc(100vh - 92px);overflow:auto;padding-right:2px}
+}
+@media (max-width:1279px){.lib.card{background:transparent;border:0;box-shadow:none}}
+@media (max-width:560px){
+  .top{padding-left:14px;padding-right:14px}
+  .brand span,.ghost .lb{display:none}
+  .ghost{width:38px;padding:0;justify-content:center}
+  h1{font-size:26px}
+  .count{font-size:64px}
+  .hint{display:none}
+  .seg{width:100%}.seg button{flex:1}
+
+  .btn.tog .lb{display:none}
+  .pbtns{flex:1 1 100%}.pbtns .primary{flex:1}.tempo{flex-basis:100%}.beats{flex-basis:100%}.toggles{margin-left:auto}
+}
+@media (prefers-reduced-motion:no-preference){.chip,.btn,.ghost,.beat,.seg button,.views button{transition:background-color .12s,border-color .12s,color .12s}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5" r="2"/><circle cx="16.5" cy="6" r="2"/><path d="M8 8v6l-2 6M8 14l3 6M8 9.5l4.5 1.5 4-1M16.5 9v5l-2 6M16.5 14l2.5 6"/></svg></div>
+    <div><b>Bachata practice room</b><span>Partner moves from the leader’s side, count by count</span></div>
+  </div>
+  <div class="topActions">
+    <button class="ghost" id="helpBtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/></svg><span class="lb">How it works</span></button>
+    <button class="ghost sq" id="themeBtn" aria-label="Switch between light and dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.500 10.500z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.900l1.400 1.400M17.700 17.700l1.400 1.400M4.900 19.100l1.400-1.400M17.700 6.300l1.400-1.400"/></svg></button>
+  </div>
+</header>
+<div class="app">
+  <nav class="lib card" aria-label="Moves">
+    <div class="chips" id="chips" role="group" aria-label="Choose a move"></div>
+  </nav>
+  <main class="work">
+    <div class="titleRow">
+      <div>
+        <p class="eyebrow" id="eyebrow"></p>
+        <h1 id="mname"></h1>
+        <p class="about" id="about"></p>
+      </div>
+      <div class="seg mode simonly" role="group" aria-label="Version">
+        <button id="mGood" aria-pressed="true">Good version</button>
+        <button id="mBad" class="badm" aria-pressed="false">Common mistake</button>
+      </div>
+    </div>
+    <div class="stage" id="stage">
+      <canvas id="cv" aria-label="Animated figures showing the selected move"></canvas>
+      <div class="count" id="count">1<small>of 8</small></div>
+      <div class="views simonly" role="group" aria-label="Camera">
+        <button data-v="side" aria-pressed="true">Side</button>
+        <button data-v="you" aria-pressed="false">Behind</button>
+        <button data-v="top" aria-pressed="false">Top</button>
+        <button data-v="pov" aria-pressed="false">POV</button>
+      </div>
+      <p class="hint" id="hint">Drag to rotate · scroll to zoom</p>
+      <div class="zoom" role="group" aria-label="Zoom">
+        <button id="zin" aria-label="Zoom in">+</button>
+        <button id="zout" aria-label="Zoom out">−</button>
+      </div>
+    </div>
+    <div class="transport card">
+      <div class="trow">
+        <div class="pbtns">
+          <button class="btn" id="prev" aria-label="Previous count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.500 6l-6 6 6 6"/></svg></button>
+          <button class="btn primary" id="play" aria-label="Play"><span class="ic"></span><span class="lb">Play</span></button>
+          <button class="btn" id="next" aria-label="Next count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.500 6l6 6-6 6"/></svg></button>
+        </div>
+        <div class="beats simonly" id="beats" role="group" aria-label="Counts"></div>
+      </div>
+      <div class="trow">
+        <div class="tempo simonly">
+          <label for="bpm">Tempo</label>
+          <input type="range" id="bpm" min="40" max="130" step="2" value="60">
+          <output id="bpmo" for="bpm">60 BPM</output>
+        </div>
+        <div class="presets simonly" role="group" aria-label="Tempo presets">
+          <button class="btn sm" data-bpm="60" aria-pressed="true">Slow</button>
+          <button class="btn sm" data-bpm="90" aria-pressed="false">Medium</button>
+          <button class="btn sm" data-bpm="120" aria-pressed="false">Song</button>
+        </div>
+        <div class="toggles">
+          <button class="btn tog" id="snd" aria-pressed="true" title="Metronome click on every count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.500v5h3.500l4.500 4v-13l-4.500 4zM16 9a4 4 0 0 1 0 6M18.500 6.500a7.500 7.500 0 0 1 0 11"/></svg><span class="lb">Click</span></button>
+          <button class="btn tog simonly" id="gd" aria-pressed="true" title="Arrows, footprints and turn arcs on the stage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.500 12s3.500-6.500 9.500-6.500 9.500 6.500 9.500 6.500-3.500 6.500-9.500 6.500S2.500 12 2.500 12z"/><circle cx="12" cy="12" r="2.800"/></svg><span class="lb">Guides</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="mbar card" id="mbar" hidden>
+      <input type="range" id="mscrub" min="0" max="1" step="0.001" value="0" aria-label="Position in the clip">
+      <div class="mrow">
+        <label>Speed <select id="mrate"><option value="0.25">0.25×</option><option value="0.5" selected>0.5×</option><option value="0.75">0.75×</option><option value="1">1×</option></select></label>
+        <button class="btn sm" id="mmir" aria-pressed="false">Mirror</button>
+        <button class="btn sm" id="mswap">Swap colors</button>
+      </div>
+      <div class="mrow">
+        <button class="btn sm" id="mtap">Tap the beat</button>
+        <button class="btn sm" id="mone">This is count 1</button>
+        <span class="minfo" id="mbpm">No beat set yet</span>
+      </div>
+      <div class="mrow">
+        <button class="btn sm" id="mA">Loop from here</button>
+        <button class="btn sm" id="mB">Loop to here</button>
+        <button class="btn sm" id="mclr">Clear loop</button>
+        <span class="minfo" id="mloop"></span>
+      </div>
+    </div>
+  </main>
+  <aside class="side" aria-label="Coaching">
+    <section class="card cueCard" id="cueCard" aria-live="polite">
+      <p class="eyebrow" id="cueEyebrow">Count 1</p>
+      <p class="cue" id="cue"></p>
+      <p class="fix" id="fix" hidden></p>
+      <p class="nextCue" id="nextCue"></p>
+    </section>
+    <section class="card details">
+      <h2><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></i><span id="dtitle">Do this</span></h2>
+      <ul id="dlist"></ul>
+      <h2 class="err"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6.500 6.500l11 11M17.500 6.500l-11 11"/></svg></i><span id="etitle">Common mistakes</span></h2>
+      <ul id="elist"></ul>
+      <p class="note simonly">Start slow, around 60 BPM. Real songs run about 120 to 130. This is a simplified guide: directions and hand holds vary between teachers, so check the details with yours.</p>
+    </section>
+    <details class="card legend simonly">
+      <summary>What you see on the stage</summary>
+      <dl>
+        <dt><span class="sw" id="youDot" style="background:var(--lead)"></span></dt><dd><b>You</b>, the leader</dd>
+        <dt><span class="sw" style="background:var(--fol)"></span></dt><dd><b>Her</b>, the follower</dd>
+        <dt><span class="sw ring"></span></dt><dd><b>Gold ring:</b> joined hands</dd>
+        <dt><span class="sw arrow"></span></dt><dd><b>Gold arrow:</b> where your left hand goes next</dd>
+        <dt><span class="sw shadow"></span></dt><dd><b>Shadow:</b> the foot carrying the weight</dd>
+        <dt><span class="sw foot"></span></dt><dd><b>Outlined foot with L or R:</b> your next step</dd>
+        <dt><span class="sw foot dash"></span></dt><dd><b>Dashed foot:</b> a tap, no weight</dd>
+        <dt><span class="sw arc"></span></dt><dd><b>Floor arc:</b> who turns, and which way</dd>
+      </dl>
+    </details>
+  </aside>
+</div>
+<dialog id="help" aria-labelledby="helpTitle">
+  <div class="dlg">
+    <div class="dlgTop"><h2 id="helpTitle">How it works</h2><button class="ghost sq" id="helpClose" aria-label="Close">✕</button></div>
+    <p>Two figures dance each move slowly, one count at a time. You are the green one.</p>
+    <h3>Practice a move</h3>
+    <ol>
+      <li>Pick a move from the list. Start with the basics.</li>
+      <li>Step through the counts with the arrows and read the cue for each one.</li>
+      <li>Press Play at a slow tempo and dance along. Speed up when it feels easy.</li>
+      <li>Switch to “Common mistake” to see what to avoid, and to POV to see it through your own eyes.</li>
+    </ol>
+    <h3>Keyboard</h3>
+    <div class="keysGrid">
+      <span><kbd>Space</kbd></span><span>Play or pause</span>
+      <span><kbd>←</kbd> <kbd>→</kbd></span><span>One count back or forward</span>
+      <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>Faster or slower</span>
+      <span><kbd>1</kbd> to <kbd>4</kbd></span><span>Camera: side, behind, top, POV</span>
+      <span><kbd>M</kbd></span><span>Good version or common mistake</span>
+      <span><kbd>G</kbd></span><span>Guides on or off</span>
+    </div>
+    <h3>Good to know</h3>
+    <p>Drag the stage to rotate the view, or to look around in POV. Moves marked “course” follow one video course and can differ from what your teacher shows. When in doubt, your teacher is right.</p>
+  </div>
+</dialog>
+<script>
+const R=Math.PI/180;
+const vec=th=>{const t=th*R;return{f:[Math.sin(t),Math.cos(t)],r:[-Math.cos(t),Math.sin(t)]}};
+const FW={1:[.06,-.28,'P',null],2:[.06,-.06,'M',null],3:[.28,-.06,'P',null],4:[.28,.16,'P','M'],5:[.28,-.06,'M',null],6:[.06,-.06,'P',null],7:[.06,-.28,'M',null],8:[-.16,-.28,'M','P']};
+const L0={x:-.42,z:0,th:90},F0={x:.42,z:0,th:-90};
+const two=[['L','R','mid'],['R','L','mid']],LP={...L0,fw:'place'};
+const KB=(c,fw)=>K({...L0,fw},{...F0,fw},two,c);
+const K=(l,f,h,cue)=>({l:{mode:'basic',...l},f:{mode:'basic',...f},h,cue});
+const T=o=>({...o,mode:'turn'});
+const TP=o=>({...o,mode:'turn',drift:1});
+const TB=o=>({...o,mode:'turn',pvt:1});
+const B=["Step to your left. Knees soft.","Close the right foot.","Step left again.","Tap right: no weight, hip pops.","Step to your right.","Close the left foot.","Step right again.","Tap left: no weight."];
+
+const moves=[
+{name:"Side basic",about:"The base of everything: 3 steps and a tap to your left, then to your right. Learn this first.",keys:B.map(c=>K(L0,F0,two,c)),
+ tips:["Soft knees the whole time. Your hips move because your knees bend.","Steps no wider than your shoulders.","Tap means no weight. You should be able to lift that foot instantly.","Eyes on her, never on your feet."],
+ errors:["Locked knees, big steps, looking down (shown in the mistake view).","Putting weight on the tap, so you start the next 4 on the wrong foot.","Moving the shoulders as much as the hips. The upper body stays calm."],
+ mistake:{flags:{stiff:1,lookDown:1,big:1},what:"Locked knees, giant steps, eyes on the floor.",fix:"Soft knees, small steps, eyes on her."}},
+{name:"Basic in place",about:"The same rhythm without traveling: 3 small steps and a tap, on the spot. Good for tight dance floors and for slow songs.",keys:["Step left, on the spot.","Step right.","Step left.","Tap right: no weight, hip pops.","Step right.","Step left.","Step right.","Tap left: no weight."].map(c=>KB(c,'place')),
+ tips:["Same rhythm as the side basic, the feet just stay under you.","Keep changing weight fully on every step.","The hips keep moving even though you don't travel."],
+ errors:["Marching with stiff knees.","Bouncing up and down instead of moving the hips side to side."]},
+{name:"Forward & back",about:"3 steps forward and a tap, then 3 steps back and a tap. She mirrors you: when you go forward, she goes back.",keys:["Step forward on your left. She steps back.","Step forward right.","Step forward left.","Tap right beside your left foot.","Step back on your right. She comes forward.","Step back left.","Step back right.","Tap left."].map(c=>KB(c,'fwd')),
+ tips:["Small steps: she is walking backward and can't see where she's going.","Move your body first, the arms just follow. Don't push her with your hands.","Keep the same distance between you the whole time."],
+ errors:["Big steps that run her over.","Pushing and pulling with the arms.","Looking at your feet."]},
+{name:"Inside turn",about:"She turns to her left under your left hand. Prep on 4, turn on 5-6-7.",keys:[
+ K(L0,F0,two,"Basic. Eyes on her, not your feet."),K(L0,F0,two,"Close."),K(L0,F0,two,"Step. Decide now."),
+ K(L0,F0,[['L','R','earL'],['R','L','low']],"Tap + prep: bring your left hand up near her LEFT ear. Your right hand stays low, still holding hers."),
+ K({x:-.3,z:0,th:90},TP({x:.36,z:0,th:5}),[['L','R','halo']],"Let go with your right hand. Left hand goes up over HER head. She turns to her left."),
+ K({x:-.3,z:0,th:90},TP({x:.36,z:0,th:185}),[['L','R','halo']],"Small circle right above her head."),
+ K({x:-.3,z:0,th:90},TP({x:.38,z:0,th:270}),[['L','R','prep']],"Hand comes down as she faces you again."),
+ K(L0,{...F0,th:270},two,"Tap: catch both hands. Back to basic.")],
+ tips:["Prep on the tap (4), turn on 5-6-7, catch on 8.","Hand path: up, small circle above her head, down.","Step a little closer during the turn so your arm stays soft.","Fingers loose. Think “hook,” not “grip.”"],
+ errors:["Too far apart with a stretched arm (shown).","Prep too late: decide on 3, prep on 4.","Gripping her hand so she can’t spin inside it."],
+ mistake:{flags:{far:1},swap:{halo:'haloFar'},what:"Too far apart, arm stretched at shoulder height. She has to duck under your arm.",fix:"Step in. Hand up and over HER head, elbow soft."}},
+{name:"Outside turn",about:"Same as the inside turn, but she turns to her right. Learn it after the inside turn.",keys:[
+ K(L0,F0,two,"Basic. Eyes up."),K(L0,F0,two,"Close."),K(L0,F0,two,"Step. Decide now."),
+ K(L0,F0,[['L','R','earR']],"Tap + prep: let go right. Bring your left hand up near her RIGHT ear."),
+ K({x:-.3,z:0,th:90},TP({x:.58,z:0,th:-185}),[['L','R','halo']],"Hand up over her head. She turns to her right."),
+ K({x:-.3,z:0,th:90},TP({x:.58,z:0,th:-365}),[['L','R','halo']],"Small clockwise circle above her head."),
+ K({x:-.3,z:0,th:90},TP({x:.54,z:0,th:-450}),[['L','R','prep']],"Hand comes down as she faces you."),
+ K(L0,{...F0,th:-450},two,"Tap: both hands. Basic.")],
+ tips:["Same hand and timing as the inside turn.","Only the direction changes: clockwise halo, she turns to her right.","If she goes the wrong way, your prep was unclear. Start the small torso turn earlier."],
+ errors:["A big stirring circle instead of a halo (shown).","The same prep as the inside turn, so she has to guess.","Pushing her hand toward her face."],
+ mistake:{swap:{halo:'haloBig'},what:"A big stirring circle instead of a small halo. It pulls her off balance.",fix:"Keep the circle small, right above her head."}},
+{name:"Your turn",about:"You turn to your right under your joined hands while she keeps dancing.",keys:[
+ K(L0,F0,two,"Basic."),K(L0,F0,two,"Close."),K(L0,F0,two,"Step. Decide now."),
+ K(L0,F0,[['L','R','prep']],"Tap + prep: let go right, lift left."),
+ K(TP({x:-.4,z:0,th:-5}),{x:.38,z:0,th:-90},[['L','R','haloLead']],"Hand above YOUR head. Turn right, eyes stay on her."),
+ K(TP({x:-.4,z:0,th:-185}),{x:.38,z:0,th:-90},[['L','R','haloLead']],"Whip your head around. Find her face first."),
+ K(TP({x:-.4,z:0,th:-270}),{x:.38,z:0,th:-90},[['L','R','mid']],"Body catches up with your eyes. Facing her."),
+ K({...L0,th:-270},F0,two,"Tap: both hands back.")],
+ tips:["Your hand goes above YOUR head, not hers.","Spotting: eyes on her as long as possible, whip the head, find her again. Watch it in POV.","Small steps in place, feet under your body."],
+ errors:["No spotting: the head turns with the body (shown).","Feet wide apart while turning, so you wobble.","Letting go of her hand."],
+ mistake:{flags:{noSpot:1},what:"No spotting: your head turns with your body, so you get dizzy and lose her.",fix:"Eyes stay on her, then the head whips around before the body."}},
+{name:"Place swap",about:"Cross-body lead: you step out of her way and she walks across to your side. 8 counts there, 8 counts back.",keys:[
+ K(T({x:-.48,z:.1,th:130}),T({x:.28,z:0,th:-90}),[['L','R','prep']],"Step back on your left and start turning left. You open the door."),
+ K(T({x:-.5,z:.46,th:180}),T({x:.08,z:0,th:-90}),[['L','R','prep']],"Keep turning: you're now beside her path. Guide her forward."),
+ K(T({x:-.42,z:.7,th:180}),T({x:-.14,z:0,th:-90}),[['L','R','prep']],"She walks straight past, in front of you."),
+ K(T({x:-.42,z:.7,th:180}),T({x:-.3,z:0,th:-90}),[['L','R','prep']],"Tap. She's crossing to the other side."),
+ K(T({x:-.27,z:.66,th:210}),T({x:-.56,z:0,th:-75}),[['L','R','prep']],"Turn to follow her. She starts her half turn to the left."),
+ K(T({x:-.03,z:.34,th:240}),T({x:-.76,z:0,th:40}),[['L','R','mid']],"She keeps turning to face you."),
+ K(T({x:.1,z:0,th:270}),T({x:-.8,z:0,th:90}),[['L','R','mid']],"Facing each other again, on swapped sides."),
+ K(T({x:.1,z:0,th:270}),T({x:-.8,z:0,th:90}),[['L','R','prep']],"Tap + prep: get ready to go back."),
+ K(T({x:.16,z:-.1,th:310}),T({x:-.66,z:0,th:90}),[['L','R','prep']],"Same way back: step back on your left, turn left."),
+ K(T({x:.18,z:-.46,th:360}),T({x:-.4,z:0,th:90}),[['L','R','prep']],"Keep turning, open her path."),
+ K(T({x:.1,z:-.7,th:360}),T({x:-.18,z:0,th:90}),[['L','R','prep']],"She walks straight past, in front of you."),
+ K(T({x:.1,z:-.7,th:360}),T({x:-.02,z:0,th:90}),[['L','R','prep']],"Tap. She's crossing."),
+ K(T({x:-.05,z:-.66,th:390}),T({x:.24,z:0,th:105}),[['L','R','prep']],"Turn to follow her. She starts her half turn."),
+ K(T({x:-.29,z:-.34,th:420}),T({x:.4,z:0,th:220}),[['L','R','mid']],"She keeps turning to face you."),
+ K(T({x:-.42,z:0,th:450}),T({x:.42,z:0,th:270}),[['L','R','mid']],"Home again, facing each other."),
+ K(T({x:-.42,z:0,th:450}),T({x:.42,z:0,th:270}),[['L','R','prep']],"Tap + prep: ready to go again.")],
+ tips:["Your first step is BACK on your left, while you turn to your left. That opens her path.","She walks straight across in front of you on 1-2-3, and turns to face you on 5-6-7. Take all 8 counts, don't rush it.","Keep the joined hand at chest height and guide her across with your body, don't pull."],
+ errors:["Stiff legs and big walking steps (shown).","Staying on her line, so she has to walk around you.","Squeezing the whole move into 3 counts. It takes 8."],
+ mistake:{flags:{stiff:1,big:1},what:"Stiff legs and big steps. You stop dancing and just walk.",fix:"Keep small bachata steps and soft knees while you pass."}},
+{name:"Wrap",about:"You turn her into your right arm. She ends at your right side with your arm around her back and her own arms crossed in front. Then you unwrap her. 16 counts.",keys:[
+ K(L0,F0,two,"Basic, both hands."),K(L0,F0,two,"Close."),K(L0,F0,two,"Step. Decide now."),
+ K(L0,F0,[['L','R','prep'],['R','L','mid']],"Tap + prep: keep both hands. Lift your left hand."),
+ K(LP,TB({x:.18,z:-.05,th:-25}),[['L','R','haloFwd'],['R','L','frontC']],"Left hand over her head. She turns left, toward your right side."),
+ K(LP,TB({x:.02,z:.3,th:40}),[['L','R','leftHigh'],['R','L','frontRt']],"Hand comes down past her LEFT shoulder, then in front of her chest. Never across her face."),
+ K(LP,{x:-.24,z:.56,th:90,fw:'place'},[['L','R','wrapFront'],['R','L','hipR']],"She lands at your right side, facing the same way. Your right arm is now around her back."),
+ K(LP,{x:-.24,z:.56,th:90,fw:'place'},[['L','R','wrapFront'],['R','L','hipR']],"Tap: you’re in the wrap. Arms relaxed."),
+ K(LP,{x:-.24,z:.56,th:90,fw:'place'},[['L','R','wrapFront'],['R','L','hipR']],"Basic together in the wrap. Your right hand holds her left hand at her far hip."),
+ K(LP,{x:-.24,z:.56,th:90,fw:'place'},[['L','R','wrapFront'],['R','L','hipR']],"Close."),
+ K(LP,{x:-.24,z:.56,th:90,fw:'place'},[['L','R','wrapFront'],['R','L','hipR']],"Step. Decide now."),
+ K(LP,{x:-.24,z:.56,th:90,fw:'place'},[['L','R','frontHigh'],['R','L','hipR']],"Tap + prep: lift your left hand first, out in front of her."),
+ K(LP,TB({x:0,z:.36,th:50}),[['L','R','haloFwd'],['R','L','frontRt']],"Hand goes up. She unwinds to her right."),
+ K(LP,TB({x:.18,z:.17,th:-30}),[['L','R','halo'],['R','L','frontC']],"Right hand stays low and soft. It’s her anchor."),
+ K(LP,TB({...F0,th:-90}),two,"She lands back in front of you."),
+ K(LP,{...F0,fw:'place'},two,"Tap: open position again.")],
+ tips:["Keep both hands the whole time.","Your right hand stays low. As she turns she rolls into your right arm: it ends behind her back, with her left hand in yours at her right hip.","Hand path: up over her head, down past her left shoulder, then in front of her chest.","In the wrap: a hug, not a seatbelt.","To unwrap, lift the left hand first. The right hand stays low."],
+ errors:["Hand coming down across her face (shown).","Squeezing her in the wrap.","Unwrapping with the right hand first."],
+ mistake:{swapAt:{6:{leftHigh:'face'},5:{haloFwd:'halo'}},what:"Your hand comes down across her face on 6.",fix:"Up over her head, then down in FRONT of her chest."}},
+{name:"Hammerlock",about:"A right turn with BOTH hands, where her left hand ends up behind her back. Then she unwinds. 16 counts.",keys:[
+ K(L0,F0,two,"Basic, both hands."),K(L0,F0,two,"Close."),K(L0,F0,two,"Step. Decide now."),
+ K(L0,F0,[['L','R','earR'],['R','L','low']],"Tap + prep: keep BOTH hands. Left hand up near her right ear, right hand stays low."),
+ K(L0,TP({x:.42,z:0,th:-185}),[['L','R','halo'],['R','L','side']],"Left hand over her head: she turns to her RIGHT. Right hand stays low at her waist."),
+ K(L0,TP({x:.44,z:0,th:-365}),[['L','R','halo'],['R','L','backC']],"Your right hand slides around her waist as she turns."),
+ K(L0,TP({x:.42,z:0,th:-450}),[['L','R','prep'],['R','L','back']],"She faces you again. Her left hand is now behind her back."),
+ K(L0,{x:.42,z:0,th:-450},[['L','R','mid'],['R','L','back']],"Tap: you're in the hammerlock. Left hand low in front."),
+ K(L0,{x:.42,z:0,th:-450},[['L','R','mid'],['R','L','back']],"Basic in the hammerlock, close and relaxed."),
+ K(L0,{x:.42,z:0,th:-450},[['L','R','mid'],['R','L','back']],"Close."),
+ K(L0,{x:.42,z:0,th:-450},[['L','R','mid'],['R','L','back']],"Step. Decide now."),
+ K(L0,{x:.42,z:0,th:-450},[['L','R','earL'],['R','L','back']],"Tap + prep: lift your left hand near her left ear to unwind."),
+ K(L0,TP({x:.42,z:0,th:-355}),[['L','R','halo'],['R','L','backC']],"She unwinds to her LEFT under your left hand."),
+ K(L0,TP({x:.44,z:0,th:-175}),[['L','R','halo'],['R','L','side']],"Your right hand comes back around her waist."),
+ K(L0,TP({x:.42,z:0,th:-90}),[['L','R','prep'],['R','L','low']],"She faces you again."),
+ K(L0,F0,two,"Tap: both hands. Done.")],
+ tips:["Keep BOTH hands the whole time.","She turns to her right under your left hand. Your right hand stays low and slides around her waist to the small of her back.","Behind her back means waist height.","To unwind, lift your left hand again: she turns back to her left."],
+ errors:["Pulling her arm up behind her back (shown).","Letting go of the low hand, so there's no hammerlock.","Lifting the low hand too, so she can't turn into it."],
+ mistake:{swapAt:{8:{back:'backHigh'},9:{back:'backHigh'},10:{back:'backHigh'},11:{back:'backHigh'}},what:"Her arm is pulled up high behind her back. That hurts her shoulder.",fix:"Keep her hand at waist height, relaxed."}}
+];
+
+const nearTh=(th,ref)=>ref+((((th-ref)+180)%360+360)%360-180);
+// Chain sections into one sequence. Each section is written as if the leader starts at home (L0, facing +x).
+// It is then turned and shifted so that it starts exactly where the leader ended the section before.
+const HOME=K(L0,F0,two,"");
+const rotP=(x,z,d)=>{const c=Math.cos(d*R),s=Math.sin(d*R);return[x*c+z*s,-x*s+z*c]};
+function chainKeys(parts){
+  const keys=[];let Lw=null,Fw=null;
+  for(const p of parts){const st=p.start||HOME;let d=0,T=[0,0],fo=0;
+    if(Lw){d=Lw.th-st.l.th;const r=rotP(st.l.x,st.l.z,d);T=[Lw.x-r[0],Lw.z-r[1]];fo=d+360*Math.round((Fw.th-st.f.th-d)/360)}
+    const tr=(o,off)=>{const r=rotP(o.x,o.z,d);return{...o,x:r[0]+T[0],z:r[1]+T[1],th:o.th+off}};
+    let ax=90;
+    p.keys.forEach((k,i)=>{if(k.l.mode==='basic')ax=k.l.th;const a=k.ax!=null?k.ax:(k.l.mode==='basic'?null:ax);
+      keys.push({l:tr(k.l,d),f:tr(k.f,fo),h:k.h,cue:k.cue,ax:a==null?undefined:a+d,seg:p.seg||p.name,segStart:i===0})});
+    const e=keys[keys.length-1];Lw=e.l;Fw=e.f}
+  return keys}
+function combo(name,about,parts){
+  const keys=chainKeys(parts.map(p=>moves.find(x=>x.name===p)));
+  moves.push({name,about,keys,combo:true,parts,
+    tips:["Every move ends in open hold, facing each other, so the next one can start cleanly.","Decide the next move on count 3, prep on the tap.","If you lose it, do a basic and start again on the next 1."],
+    errors:["Rushing into the next move before finishing the tap.","Thinking so hard about the next move that you stop looking at her."]});
+}
+// ---- The course combination (Demetrio & Nicole, Bachata Dance Academy), read from the video count by count.
+// It is one long sequence of 8-count sections. Each section is written as if you start at home, facing +x,
+// and chainKeys() places it where the section before ended. Sections that don't end where they began have a `start`.
+const SEG=(()=>{
+ const FP={...F0,fw:'place'},LPl={...L0,fw:'place'};
+ const X=o=>({...T(o),cross:1});
+ const S={};
+ S.basic={seg:"Basic",keys:B.map(c=>K(L0,F0,two,c))};
+ S.cbl={seg:"Cross-body lead",keys:[
+  K(T({x:-.44,z:-.17,th:90}),FP,two,"Step left, a bit bigger than in the basic. She does her basic on the spot."),
+  K(X({x:-.42,z:-.38,th:90}),FP,two,"Cross your right foot over. Your hands stay where they were, in front of her."),
+  K(T({x:-.42,z:-.58,th:88}),FP,two,"Step left again. You’re out of her lane."),
+  K(T({x:-.42,z:-.58,th:86}),FP,two,"Tap right. Her path is open on your right side."),
+  K(T({x:-.12,z:-.64,th:80}),T({x:.18,z:.02,th:-100}),two,"Step forward on your right, along your own lane, and bring her forward along hers."),
+  K(T({x:.24,z:-.62,th:10}),T({x:-.14,z:-.02,th:-150}),two,"Second step. You pass right shoulder to right shoulder and both start turning right."),
+  K(T({x:.42,z:-.46,th:-30}),T({x:-.4,z:-.2,th:-240}),two,"Third step: you’re at her end now, she’s at yours. Keep turning to face her."),
+  K(T({x:.43,z:-.3,th:-90}),T({x:-.43,z:-.3,th:-270}),two,"Tap left. You’ve swapped places and face each other again.")]};
+ S.lturn={seg:"Left turn",keys:[
+  K(L0,F0,two,"Basic. Relax your left hand: slide down to a fingertip hold."),
+  K(L0,F0,two,"Close. Turn your left hand so your fingers point the way she will turn."),
+  K(L0,F0,[['L','R','prep'],['R','L','low']],"Step, and your left hand comes up. Your right hand stays low, still connected."),
+  K(L0,F0,[['L','R','high'],['R','L','low']],"Tap: left hand high between you. That’s the signal."),
+  K({x:-.3,z:0,th:90},TP({x:.36,z:0,th:5}),[['L','R','halo']],"Let go with your right hand. Turn her to her left under your left hand."),
+  K({x:-.3,z:0,th:90},TP({x:.36,z:0,th:185}),[['L','R','halo']],"Draw a circle above her head. Keep doing your own basic."),
+  K({x:-.3,z:0,th:90},TP({x:.38,z:0,th:270}),[['L','R','prep']],"She faces you again. The hand comes down."),
+  K(L0,{...F0,th:270},[['L','R','low']],"Tap: hand at belt level. Don’t take her other hand.")]};
+ const HK1=[['R','R','back'],['L','L','frontL']],LH=(x,z,th)=>T({x:-.5+x,z:-.52+z,th});
+ S.hturn={seg:"Your turn into hammerlock",start:K(L0,F0,[['L','R','low']],"Open position. Your left hand holds her right hand at belt level, your right hand is free."),keys:[
+  K(T({x:-.44,z:-.16,th:180}),FP,[['L','R','waistNear']],"Step left and turn to your LEFT. Keep her hand at your waist."),
+  K(T({x:-.46,z:-.32,th:270}),FP,[['L','R','waistNear']],"Second step: your back is to her. Her hand slides around your waist."),
+  K(T({x:-.5,z:-.52,th:360}),FP,[[null,'R','waistNear']],"A bigger third step, still travelling left. Let go and keep turning."),
+  K(T({x:-.5,z:-.52,th:450}),FP,[['R','R','low']],"Tap, facing her. Take her right hand with your RIGHT hand, like a handshake."),
+  K(LH(.03,-.06,430),T({x:.1,z:.04,th:-75}),[['R','R','low']],"Step on the spot. Pull her forward and down, toward your right side."),
+  K(LH(0,-.06,400),T({x:-.3,z:.08,th:0}),[['R','R','low']],"She walks past your right side and turns to her left. Keep the hand low."),
+  K(LH(-.03,-.02,370),T({x:-.7,z:.04,th:80}),[['R','R','back']],"Third step. Her right hand slides behind her back, at waist height."),
+  K(LH(-.03,.02,360),T({x:-.85,z:0,th:90}),HK1,"Tap. She has passed you and turned around. Take her left hand in front of her.")]};
+ const LB={x:-.46,z:-.32,th:90,fw:'place'},FB={x:.22,z:-.22,th:-90,fw:'place'},HK2=[['R','R','low'],['L','L','sideBackR']];
+ S.back={seg:"Hammerlock exit",start:K(LH(-.03,.02,0),T({x:-.85,z:0,th:90}),HK1,"Hammerlock: she is just past your right side with her right hand behind her back. Left hands are joined in front of her."),keys:[
+  K(LH(0,-.04,20),T({x:-.6,z:.04,th:65}),HK1,"Send her back the way she came. She steps forward and starts turning to her right."),
+  K(LH(.02,-.04,50),T({x:-.3,z:.02,th:0}),[['R','R','low'],['L','L','side']],"Your left hand guides her left side around. Her right hand comes out from behind her back."),
+  K(LH(.04,.14,80),T({x:.18,z:-.14,th:-70}),HK2,"Step in front of her. Now her LEFT hand goes behind her back."),
+  K(LH(.04,.2,90),T({x:.22,z:-.22,th:-90}),HK2,"Tap. You face each other, close. One hand behind her back, one in front."),
+  K(LB,FB,HK2,"Basic together, small steps. Keep the hand behind her back low and relaxed."),
+  K(LB,FB,HK2,"Close."),
+  K(LB,FB,HK2,"Step."),
+  K(LB,FB,HK2,"Tap. Get ready to lift your right hand.")]};
+ const FC={x:.26,z:.1,th:-90,fw:'place'},HS=[null,'R','ownShR'];
+ S.loopturn={seg:"Her loop and turn",start:K(LPl,FC,HK2,"Close, facing each other. Her left hand is behind her back in your left hand. Right hands joined in front."),keys:[
+  K(LPl,FC,[['R','R','high'],['L','L','sideBackR']],"Lift your right hand straight up the middle, between you. It’s a loop, not a turn."),
+  K(LPl,FC,[['R','R','crown'],['L','L','sideBackR']],"Take it over her head. Soft hand, she lets her elbow open."),
+  K(LPl,FC,[['R',null,'besideL'],HS,['L','L','sideBackR']],"Let go as your hand comes down past her left ear. Her hand stays by her shoulder."),
+  K(LPl,FC,[['R',null,'shoulderL'],HS,['L','L','sideBackR']],"Tap. Your right hand rests on the front of her left shoulder."),
+  K(L0,TP({x:.26,z:.1,th:-40}),[['R',null,'shoulderL'],['L','L','sideR'],HS],"Push the shoulder gently, pull your left hand: she turns to her left. Basic to your right."),
+  K(L0,TP({x:.28,z:.1,th:60}),[['R',null,'bladeL'],['L','L','low'],HS],"As her back comes round, put your right hand on her left shoulder blade."),
+  K(L0,TP({x:.28,z:.1,th:170}),[['R',null,'bladeL'],['L','L','low'],HS],"Third step. Wait until she is almost round before you move her arm."),
+  K(L0,TP({x:.28,z:.1,th:245}),[['R',null,'bladeL'],['L','L','high'],[null,'R','leadShL']],"Tap. She is almost round. Lift your left hand, with her hand in it.")]};
+ const FQ={x:.2,z:.1,th:270,fw:'place'},HC=[[null,'L','leadNape'],['L','R','closed'],['R',null,'bladeL']];
+ S.hisloop={seg:"Your loop and cross-body lead",start:K(L0,TP({x:.28,z:.1,th:245}),[['R',null,'bladeL'],['L','L','high'],[null,'R','leadShL']],"She has almost finished her turn. Your right hand is on her shoulder blade, left hands joined and rising."),keys:[
+  K(T({x:-.42,z:-.12,th:90}),TP({x:.26,z:.1,th:265}),[['L','L','haloLead'],['R',null,'bladeL'],[null,'R','leadShL']],"Step left. Lift your elbow and take your left hand over YOUR head, her hand with it."),
+  K(X({x:-.42,z:-.24,th:90}),TP({x:.2,z:.1,th:270}),HC,"Cross over. Leave her hand behind your neck, then take her right hand with your left."),
+  K(T({x:-.42,z:-.48,th:88}),FQ,HC,"A bigger step left. You’re in a closed hold and out of her lane."),
+  K(T({x:-.42,z:-.48,th:86}),FQ,HC,"Tap."),
+  K(T({x:-.16,z:-.58,th:80}),T({x:.1,z:.08,th:250}),HC,"Step forward on your right and bring her through on your right side."),
+  K(T({x:.14,z:-.62,th:10}),T({x:-.12,z:0,th:200}),HC,"Turn to your right together. Stay close."),
+  K(T({x:.3,z:-.46,th:-30}),T({x:-.4,z:-.2,th:120}),HC,"Third step: you’ve swapped places."),
+  K(T({x:.3,z:-.34,th:-90}),T({x:-.44,z:-.48,th:90}),HC,"Tap. Closed hold, facing each other.")]};
+ const FZ={x:.24,z:.14,th:-90};
+ S.closed={seg:"Basic in closed hold",start:K(L0,FZ,HC,"Closed hold."),keys:["Basic in the closed hold. Step left.","Close.","Step.","Tap.","Step right.","Close.","Step.","Tap. That’s the whole combination."].map(c=>K(L0,FZ,HC,c))};
+ return S})();
+{
+ const add=(name,about,parts,tips,errors,extra)=>moves.push({name,about,keys:parts.length>1?chainKeys(parts):parts[0].keys,start:parts[0].start,tips,errors,...extra});
+ add("Cross-body lead (course)","You swap places with her. You step out of her lane on 1-2-3-4 and bring her through on 5-6-7-8. Both hands stay connected. 8 counts there, 8 counts back.",[SEG.cbl,SEG.cbl],
+  ["Counts 1 to 4 are only for you: you get out of her way while she does a small basic.","Keep your hands where they were, in front of her. If your hands travel with you, she follows you and the lane closes.","On 5-6-7 you walk around to where she was, and she walks straight to where you were.","Think “we switch places.” Don’t overthink the feet."],
+  ["Taking your hands with you when you step aside, so she follows you.","Pulling her through with your arms instead of walking.","Standing still on 5-6-7 instead of taking your three steps.","Stepping on her toes: make your side steps clear enough to leave her lane."]);
+ add("Left turn with prep (course)","Her left turn under your left hand, the way the course builds it: the hand rises on 3 and 4, she turns on 5-6-7, and you finish with one hand at belt level.",[SEG.lturn],
+  ["Before the hand goes up, relax it: slide to a fingertip hold and turn your hand so the fingers point where she will turn.","Hand up on 3-4, turn on 5-6-7.","Draw a circle around her with your hand. Don’t stand back and wait for her to turn by herself.","On 7-8 the hand comes down to belt level and you do NOT take her other hand."],
+  ["Lifting the hand with a tight grip, so she can’t rotate inside it.","Staying far back with a stretched arm.","Taking her other hand at the end. The next move needs it free."]);
+ add("Your turn into hammerlock (course)","You turn to your left on 1-2-3-4 and change to a handshake hold. On 5-6-7-8 you pull her forward past your right side into a hammerlock. Starts with your left hand holding her right.",[SEG.hturn],
+  ["Every step of your turn travels to your left. Don’t come back to where you started.","Keep her hand at your waist while you turn. When you let go on 3, your other hand is already there to take it.","Step 3 is a little bigger. It leaves a lane on your right side for her.","On 5 pull forward at an angle and DOWN, early, so her arm ends behind her back without bending upward.","Do a basic on the spot on 5-6-7. Don’t just stand there."],
+  ["Lifting her hand to shoulder height in the hammerlock. That twists her arm.","Stepping back toward her at the end of your turn, so she has no lane.","Gripping. The hands must be able to slide and rotate against each other.","Standing still while she walks."]);
+ add("Hammerlock exit (course)","From the hammerlock at your right side you send her back the way she came. She turns to her right, and the arms switch: now her left hand is behind her back. Then a basic together.",[SEG.back],
+  ["Push her left side forward and around with your left hand. It’s a push and a turn at once.","As she turns, the hand that was in front slides behind her back and the other comes out.","Step in front of her on 3 and 4.","Her joints are sensitive in this hold. Go slowly and keep the hands low."],
+  ["Pulling the arm that is behind her back.","Staying beside her instead of stepping in front.","Holding the hands so tight that they can’t change places."]);
+ add("Her loop and turn (course)","A loop: your right hand lifts her right hand straight over her own head and lets it go. Then you turn her to her left with a push on the shoulder. Starts from the close hold with her left hand behind her back.",[SEG.loopturn],
+  ["A loop goes straight up the middle and over her head. A turn starts from the side. That’s how she tells them apart.","Let go by 3, hand on the front of her left shoulder by 4.","To turn her: push the shoulder with your right hand, pull with your left. Gently. She should still be able to do her basic.","By 6 your right hand is on her left shoulder blade.","Straighten her arm first and wait until she has almost come round before you move it further."],
+  ["Pushing her backward instead of turning her. If she falls back, push less and pull more.","Sweeping the loop across her face.","Yanking the arm that was behind her back."]);
+ add("Your loop to closed hold (course)","You take your own left hand over your head, so her hand lands behind your neck: a closed hold. Meanwhile you step out of her lane, then bring her through on your right side. Ends with a basic in closed hold.",[SEG.hisloop,SEG.closed],
+  ["Lift your elbow to make a tunnel and put your own head through it.","While you loop on 1-2-3 you are already stepping left, out of her way. Step 3 is the bigger one.","Then it’s the same cross-body lead as at the start, just in a closed hold.","Small steps. In a closed hold her feet are right next to yours."],
+  ["Forgetting to step aside while you loop, so there’s no room to bring her through.","Dropping her hand on your head instead of behind your neck.","Stepping on her toes."]);
+}
+combo("Combo 1: Turns","Basic, inside turn, basic, outside turn. 32 counts. Your first full sequence.",["Side basic","Inside turn","Side basic","Outside turn"]);
+combo("Combo 2: Wrap","Basic, wrap in and out, then an inside turn. 32 counts.",["Side basic","Wrap","Inside turn"]);
+combo("Combo 3: Full dance","Inside turn, hammerlock, your turn, place swap, wrap. 64 counts with no plain basics in between.",["Inside turn","Hammerlock","Your turn","Place swap","Wrap"]);
+moves.push({name:"Course combination",about:"The whole sequence from the Demetrio & Nicole course, in order: basic, cross-body lead, her left turn, your turn into the hammerlock, the exit, her loop and turn, your loop, and a cross-body lead in closed hold. 64 counts.",
+  keys:chainKeys([SEG.basic,SEG.cbl,SEG.lturn,SEG.hturn,SEG.back,SEG.loopturn,SEG.hisloop,SEG.closed]),combo:true,start:K(L0,F0,two,"Open position, both hands. You start with one basic."),parts:["Basic","Cross-body lead","Left turn","Your turn into hammerlock","Hammerlock exit","Her loop and turn","Your loop and cross-body lead","Basic in closed hold"],
+  tips:["Learn it one section at a time: each section is also in the list under “From the course.”","There is no basic between the sections. While you finish one, you are already preparing the next.","In class you would put a basic between the moves. Do that whenever you need time to think.","If she is new to this too, go slowly and let each other make mistakes."],
+  errors:["After your own turn, going back into a basic instead of stepping out of her way.","Taking her free hand after her left turn. You need it free for your turn.","Rushing the hammerlock. Keep those hands low and gentle."]});
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d');
+let NL=false,camY=.9,zoom=1,chipBtns=[],guides=true,tgt=[0,0],pov=false,lookY=0,lookP=.4,cam=null,bad=false,FL={},mi=0,t=0,playing=false,bpm=60,sound=true,yaw=.62,pitch=.36,keys=[],N=8,W=0,H=0,FOC=0,colors={},lastFloor=0,audio=null;
+
+const wrapDeg=d=>((d+180)%360+360)%360-180;
+const lerp=(a,b,s)=>a+(b-a)*s,lerp3=(a,b,s)=>[lerp(a[0],b[0],s),lerp(a[1],b[1],s),lerp(a[2],b[2],s)];
+const ease=s=>s<.5?2*s*s:1-Math.pow(-2*s+2,2)/2;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function mono(p0,p1,p2,p3,s){
+  const d0=p1-p0,d1=p2-p1,d2=p3-p2;let m1=d0*d1<=0?0:(d0+d1)/2,m2=d1*d2<=0?0:(d1+d2)/2;
+  if(Math.abs(d1)<1e-9){m1=0;m2=0}else{const a=m1/d1,b=m2/d1,h=a*a+b*b;if(h>9){const k=3/Math.sqrt(h);m1=k*a*d1;m2=k*b*d1}}
+  const s2=s*s,s3=s2*s;return(2*s3-3*s2+1)*p1+(s3-2*s2+s)*m1+(-2*s3+3*s2)*p2+(s3-s2)*m2;
+}
+function shoulder(st,side){const v=vec(st.th),s=side==='R'?.18:-.18;return[st.c[0]+v.r[0]*s,1.38,st.c[1]+v.r[1]*s]}
+function restHand(st,side){const v=vec(st.th),k=side==='R'?.24:-.24;return[st.c[0]+v.f[0]*.16+v.r[0]*k,.98,st.c[1]+v.f[1]*.16+v.r[1]*k]}
+
+function prepare(){
+  const m=moves[mi],mk=bad&&m.mistake?m.mistake:null;FL=mk&&mk.flags||{};N=m.keys.length;
+  NL=!!m.start; // a move with a starting position does not loop: it jumps back to the start
+  const mk1=(key,i)=>{
+    let l={...key.l},f={...key.f};
+    const S=FL.far?1.1:.78;l.x*=S;l.z*=S;f.x*=S;f.z*=S;
+    const sw={...(mk&&mk.swap||{}),...(mk&&mk.swapAt&&mk.swapAt[i+1]||{})};
+    return{l,f,h:key.h.map(([a,b,ty])=>[a,b,sw[ty]||ty]),cue:key.cue,ax:key.ax};
+  };
+  const src=m.keys.map(mk1);
+  const raw=[NL?mk1(m.start,-1):src[N-1],...src];
+  let ax=90;const out=[],axes={};
+  for(const k of NL?[...Array(N+1).keys()]:[...Array(N).keys()].map(i=>i+1).concat([0])){const L=raw[k].l;if(L.mode==='basic')ax=L.th;if(raw[k].ax!=null)ax=raw[k].ax;axes[k]=ax}
+  for(let k=0;k<=N;k++){
+    const key=raw[k],tc=k===0?((N-1)%8)+1:((k-1)%8)+1;
+    let l={...key.l},f={...key.f};
+    if(k===0&&!NL){l.th=raw[1].l.th+wrapDeg(l.th-raw[1].l.th);f.th=raw[1].f.th+wrapDeg(f.th-raw[1].f.th)}
+    out.push({l:dancer(l,tc,axes[k],true),f:dancer(f,tc,axes[k],false)});
+  }
+  const sideV=(th,sd)=>{const q=vec(th),s=sd==='L'?FS:-FS;return[-q.r[0]*s,-q.r[1]*s]};
+  for(const w of['l','f'])for(let k=0;k<=N;k++){const d=out[k][w];d.fL=d.fR=d.th}
+  for(const pass of[0,1])for(const w of['l','f']){
+   if(pass&&!NL&&(out[N][w].pv||out[N][w].adj)){const a=out[0][w],z=out[N][w];a.adj=z.adj;a.L=z.L;a.R=z.R;a.c=z.c;a.fL=z.fL+(a.th-z.th);a.fR=z.fR+(a.th-z.th)}
+   for(let k=1;k<=N;k++){const cur=out[k][w],prev=out[k-1][w];
+    if(!cur.turn){
+      // coming out of a turn into the basic: no foot may slide. The standing foot stays where it is,
+      // and each foot only reaches its basic position on its own next step.
+      if(prev.pv||prev.adj){const sup=prev.wL?'L':'R',fr=sup==='L'?'R':'L',ps=prev[sup];
+        if(cur.wL===prev.wL){if(prev.pv&&prev.trav&&Math.hypot(cur[sup][0]-ps[0],cur[sup][2]-ps[2])>.12)continue;const a=sideV(cur.th,fr),b=sideV(cur.th,sup);
+          cur[sup]=[ps[0],0,ps[2]];cur[fr]=[ps[0]+a[0]-b[0],cur[fr][1],ps[2]+a[1]-b[1]];cur.adj=1}
+        else if(Math.hypot(cur[sup][0]-ps[0],cur[sup][2]-ps[2])>.01){cur[sup]=[ps[0],0,ps[2]];cur.adj=1}
+        if(cur.adj){const wf=cur.wL?cur.L:cur.R,of=cur.wL?cur.R:cur.L;cur.c=[wf[0]*.75+of[0]*.25,wf[2]*.75+of[2]*.25]}}
+      continue}
+    if(cur.pv){
+      // pivot turn: the body turns over the standing foot, the free foot steps in beside it
+      const sup=prev.wL?'L':'R',ps=prev[sup],so=sideV(cur.th,sup),tol=cur.trav?.06:.09;
+      let cx=ps[0]-so[0],cz=ps[2]-so[1];
+      const ex=cur.b[0]-cx,ez=cur.b[1]-cz,el=Math.hypot(ex,ez);
+      const nw=cur.wL?'L':'R',fr=sup==='L'?'R':'L',sf=sideV(cur.th,fr);
+      if(cur.trav&&nw!==sup){
+        // walking step while turning: the stepping foot lands AHEAD of the body, the body ends up
+        // between the two feet. Strides are capped so no leg has to stretch.
+        const nb=out[k<N?k+1:1][w].b;let lx=(nb[0]-cur.b[0])*.5,lz=(nb[1]-cur.b[1])*.5;const ll=Math.hypot(lx,lz);
+        if(ll>.17){lx*=.17/ll;lz*=.17/ll}
+        let sx=cur.b[0]+lx-cx,sz=cur.b[1]+lz-cz;
+        const s0=sideV(prev.th,fr),nx=s0[0]/FS,nz=s0[1]/FS,dn=sx*nx+sz*nz;
+        if(!cur.cross&&dn<-.07){sx-=nx*(dn+.07);sz-=nz*(dn+.07)}
+        if(cur.cross){const fq=vec(cur.th).f;sx+=fq[0]*.11;sz+=fq[1]*.11} // a crossing foot lands in front of the other one
+        const sl=Math.hypot(sx,sz),cap=cur.cross?.3:.36;if(sl>cap){sx*=cap/sl;sz*=cap/sl}
+        cur[sup]=[ps[0],0,ps[2]];cur[fr]=[cx+sx+sf[0],0,cz+sz+sf[1]];
+        const nxk=out[Math.min(k+1,N)][w];
+        cur['f'+fr]=cur.th+clamp((nxk.th-cur.th)*.4,-50,50);cur['f'+sup]=clamp(prev['f'+sup],cur.th-50,cur.th+50);
+        cur.c=[cx+sx*.5,cz+sz*.5];continue;
+      }
+      if(el>tol){let dx=ex*(1-tol/el),dz=ez*(1-tol/el);
+        // the stepping foot may travel, but never sideways across the standing foot
+        // it may land in line with the standing foot (as in a travelling turn) but only clearly in front of or behind it
+        const nx=sf[0]/FS,nz=sf[1]/FS,fq=vec(cur.th).f;let lat=dx*nx+dz*nz+FS*2;
+        if(lat<.08){dx+=nx*(.08-lat);dz+=nz*(.08-lat);lat=.08} // never straight behind the other foot: knees need room
+        const fw=dx*fq[0]+dz*fq[1];
+        if(nw!==sup&&lat<.11&&Math.abs(fw)<.17){const g=(fw>=0?.17:-.17)-fw;dx+=fq[0]*g;dz+=fq[1]*g}
+        cx+=dx;cz+=dz}
+      cur[sup]=[ps[0],0,ps[2]];cur[fr]=[cx+sf[0],nw===sup?cur[fr][1]:0,cz+sf[1]];
+      // where each foot points: the landing foot is already turned toward where the turn is going,
+      // the standing foot keeps its direction and only pivots when the hips force it to
+      const nxk=out[Math.min(k+1,N)][w],lead=nw===sup?0:clamp((nxk.th-cur.th)*.4,-50,50);
+      cur['f'+fr]=cur.th+lead;cur['f'+sup]=clamp(prev['f'+sup],cur.th-50,cur.th+50);
+      cur.c=[cx,cz];continue;
+    }
+    {const su=prev.wL?'L':'R',fe=su==='L'?'R':'L',nk=out[Math.min(k+1,N)][w],stp=cur.wL!==prev.wL;
+      cur['f'+su]=clamp(prev['f'+su],cur.th-50,cur.th+50);cur['f'+fe]=cur.th+(stp?clamp((nk.th-cur.th)*.4,-50,50):0)}
+    if(cur.wL===prev.wL)continue;
+    const pl=cur.wL?'R':'L',sp=cur.wL?'L':'R',nx=out[Math.min(k+1,N)][w],v=vec(cur.th+clamp(nx.th-cur.th,-170,170)/2),sg=sp==='L'?FS:-FS;
+    cur[pl]=[prev[pl][0],0,prev[pl][2]];
+    cur[sp]=[cur.b[0]-v.r[0]*sg,0,cur.b[1]-v.r[1]*sg];
+    cur.c=[cur[sp][0]*.6+cur[pl][0]*.4,cur[sp][2]*.6+cur[pl][2]*.4];
+  }}
+  for(let k=0;k<=N;k++){const st=out[k],conn={l:{},f:{}};
+    const anc={l:{},f:{}};
+    st.l.JP={};st.f.JP={};
+    for(const [lh,fh,ty] of raw[k].h){const p=connPos(st,lh,fh,ty),an=ANCHOR[ty]||null;if(lh){conn.l[lh]=p;anc.l[lh]=an}if(fh){conn.f[fh]=p;anc.f[fh]=an}if(lh&&fh){st.l.JP[lh]=fh;st.f.JP[fh]=lh}} // a hand can also rest on the partner: then only one of the two is named
+    for(const w of['l','f']){st[w].H={};st[w].J={};st[w].A={};st[w].HL={};for(const sd of['L','R']){st[w].J[sd]=!!conn[w][sd];const p=st[w].H[sd]=conn[w][sd]||restHand(st[w],sd);
+      // a hand that rests on a body is remembered relative to that body, so it stays on it while the body turns between counts
+      const an=st[w].A[sd]=conn[w][sd]?anc[w][sd]:w;if(an){const B=st[an],q=vec(B.th),dx=p[0]-B.c[0],dz=p[2]-B.c[1];st[w].HL[sd]=[dx*q.r[0]+dz*q.r[1],dx*q.f[0]+dz*q.f[1],p[1]]}}}
+  }
+  keys=out;
+}
+function dancer(d,tc,axTh,isLead){
+  const v=vec(d.th),a=vec(axTh),axis=[-a.r[0],-a.r[1]],left=[-v.r[0],-v.r[1]],sc=FL.big?1.9:1;
+  const [P0,M0,w,lift]=FW[tc],P=P0*sc,M=M0*sc;let pP,mP,LisP=true,bx=d.x,bz=d.z;
+  if(d.mode==='basic'&&d.fw==='fwd'){const fa=a.f;pP=[d.x+fa[0]*P+axis[0]*FS,d.z+fa[1]*P+axis[1]*FS];mP=[d.x+fa[0]*M-axis[0]*FS,d.z+fa[1]*M-axis[1]*FS];LisP=!!isLead}
+  else if(d.mode==='basic'){const k=d.fw==='place'?.22:1,o=d.fw==='place'?FS:0;pP=[d.x+axis[0]*(P*k+o),d.z+axis[1]*(P*k+o)];mP=[d.x+axis[0]*(M*k-o),d.z+axis[1]*(M*k-o)];LisP=(left[0]*axis[0]+left[1]*axis[1])>=0}
+  else{const dr=d.drift?[0,-.125,0,.125,.25,.125,0,-.125,-.25][tc]:0;bx=d.x+axis[0]*dr;bz=d.z+axis[1]*dr;pP=[bx+left[0]*FS,bz+left[1]*FS];mP=[bx-left[0]*FS,bz-left[1]*FS];if(d.mir||!isLead){LisP=false;[pP,mP]=[mP,pP]}}
+  const Lf=LisP?pP:mP,Rf=LisP?mP:pP,flip=!isLead&&d.mode==='basic'&&d.fw==='place'&&LisP;let wL=(w==='P')===LisP;
+  let liftL=lift?((lift==='P')===LisP):false,liftR=lift?!liftL:false;if(flip){wL=!wL;[liftL,liftR]=[liftR,liftL]} // she keeps her own footwork when she stands beside him
+  const wf=wL?Lf:Rf,of=wL?Rf:Lf,mix=d.mode==='turn'?.55:.75;
+  return{b:[bx,bz],th:d.th,c:[wf[0]*mix+of[0]*(1-mix),wf[1]*mix+of[1]*(1-mix)],L:[Lf[0],liftL?.03:0,Lf[1]],R:[Rf[0],liftR?.03:0,Rf[1]],wL,tap:tc%4===0,turn:d.mode==='turn',pv:d.mode==='turn',trav:!d.drift,soft:!!d.soft,cross:!!d.cross};
+}
+// hand positions that sit on one dancer's body ('f' = hers, 'l' = his). Everything else is a point in the room.
+const ANCHOR={earL:'f',earR:'f',sideBackL:'f',sideBackR:'f',frontHigh:'f',back:'f',backHigh:'f',sideR:'f',side:'f',leftHigh:'f',chest:'f',face:'f',wrapFront:'f',hipR:'f',frontL:'f',crown:'f',besideL:'f',shoulderL:'f',bladeL:'f',ownShR:'f',frontRt:'f',frontC:'f',backC:'f',frontL2:'f',leadShL:'l',leadNape:'l'};
+function connPos(st,lh,fh,ty){
+  const fv=vec(st.f.th),lv=vec(st.l.th),fc=st.f.c,lc=st.l.c;
+  const dx=lc[0]-fc[0],dz=lc[1]-fc[1],dl=Math.hypot(dx,dz)||1,tl=[dx/dl,dz/dl];
+  const at=(o,y)=>[o[0],y,o[1]],off=(base,a,b,ka,kb)=>[base[0]+a[0]*ka+b[0]*kb,base[1]+a[1]*ka+b[1]*kb];
+  switch(ty){
+    case 'mid':case 'prep':{const a=shoulder(st.l,lh),b=shoulder(st.f,fh);return[(a[0]+b[0])/2,ty==='prep'?1.28:1.04,(a[2]+b[2])/2]}
+    case 'earL':return at(off(fc,fv.r,fv.f,-.14,.2),1.5);
+    case 'earR':return at(off(fc,fv.r,fv.f,.14,.2),1.5);
+    case 'low':{const a=shoulder(st.l,lh),b=shoulder(st.f,fh);return[(a[0]+b[0])/2,.92,(a[2]+b[2])/2]}
+    case 'sideBackL':return at(off(fc,fv.r,fv.f,-.16,-.05),1.06);
+    case 'halo':return at(off(fc,tl,fv.f,.14,.05),1.9);
+    case 'haloOut':return at(off(fc,tl,fv.f,.24,0),1.97);
+    case 'frontHigh':return at(off(fc,fv.f,fv.r,.34,0),1.38);
+    case 'haloFwd':return at(off(fc,tl,fv.f,.2,.2),2.08);
+    case 'haloLead':return at(off(off(lc,tl,lv.f,-.14,.05),lv.r,lv.f,-.09,0),1.92); // above his own head, a little to the side of the arm that holds it
+    case 'haloFar':return at(off(fc,tl,fv.f,.42,0),1.45);
+    case 'haloBig':return at(off(fc,tl,fv.f,.14,.34),1.82);
+    case 'back':return at(off(fc,fv.f,fv.r,-.11,-.1),1.07); // the small of her back, on her left: the side his arm comes round
+    case 'backHigh':return at(off(fc,fv.f,fv.r,-.16,-.08),1.32);
+    case 'sideR':return at(off(fc,fv.r,fv.f,.22,0),1.05);
+    case 'side':return at(off(fc,fv.r,fv.f,-.16,.05),1.05);
+    case 'sideRHigh':return at(off(fc,fv.r,tl,.34,.08),1.3);
+    case 'leftHigh':return at(off(fc,fv.r,fv.f,-.4,.15),1.92);
+    case 'chest':return at(off(fc,fv.f,fv.r,.26,-.04),1.3);
+    case 'face':return at(off(fc,fv.f,fv.r,.4,-.1),1.55);
+    case 'wrapFront':return at(off(fc,fv.f,fv.r,.2,-.1),1.06);
+    case 'frontRt':return at(off(fc,fv.f,fv.r,.2,.1),1.02); // in front of her, a little to her right, clear of her skirt
+    case 'frontC':return at(off(fc,fv.f,fv.r,.23,-.02),1.02); // straight in front of her
+    case 'frontL2':return at(off(fc,fv.r,fv.f,-.13,.17),1.02); // in front of her left hip
+    case 'backC':return at(off(fc,fv.f,fv.r,-.125,0),1.07); // the middle of her back, at the waist
+    case 'hipR':return at(off(fc,fv.r,fv.f,.16,-.01),1.06); // her right hip: in the wrap this is the far side, so his arm lies behind her back
+    // course combination: holds and contact points
+    case 'high':{const a=shoulder(st.l,lh),b=shoulder(st.f,fh);return[a[0]*.4+b[0]*.6,1.72,a[2]*.4+b[2]*.6]}
+    case 'waistNear':return at(off(lc,tl,lv.f,-.15,0),1.0); // his waist, on the side nearest to her
+    case 'sideBackR':return at(off(fc,fv.r,fv.f,.15,-.08),1.06); // her right hip, slightly behind
+    case 'frontL':return at(off(fc,fv.f,fv.r,.2,-.12),1.15); // in front of her, a little to her left
+    case 'crown':return at(off(fc,fv.f,fv.r,.1,0),1.92); // just above and in front of her head
+    case 'besideL':return at(off(fc,fv.r,fv.f,-.2,.03),1.58); // beside her head, on her left // behind her neck
+    case 'shoulderL':return at(off(fc,fv.r,fv.f,-.175,.07),1.37); // front of her left shoulder
+    case 'bladeL':return at(off(fc,fv.r,fv.f,-.175,.02),1.24); // her left side, under her arm: where his hand can actually reach in a closed hold // her left shoulder blade
+    case 'ownShR':return at(off(fc,fv.r,fv.f,.1,.15),1.3); // her own hand held in front of her right shoulder
+    case 'leadShL':return at(off(lc,lv.r,lv.f,-.17,.05),1.4); // on his left shoulder
+    case 'leadNape':return at(off(lc,lv.r,lv.f,.18,-.05),1.46); // behind his neck, toward his right shoulder
+    case 'closed':return at(off([(lc[0]+fc[0])/2,(lc[1]+fc[1])/2],lv.r,lv.f,-.2,0),1.25); // closed hold: joined hands at chest height on his left
+  }
+}
+function get(i,w){if(NL)return keys[clamp(i,0,N)][w];let k=i,o=0;const dTh=keys[N][w].th-keys[0][w].th;
+  if(i<0){k=N+i;o=-dTh}else if(i>N){k=i-N;o=dTh}
+  const s=keys[k][w];return o?{...s,th:s.th+o,fL:s.fL+o,fR:s.fR+o}:s}
+// where a dancer's body is right now, and which way it faces
+function cthAt(w){
+  const a=NL?Math.min(Math.floor(t),N-1):Math.floor(t)%N,s=NL?Math.min(t-a,1):t-Math.floor(t);
+  const P0=get(a-1,w),P1=get(a,w),P2=get(a+1,w),P3=get(a+2,w),M=fn=>mono(fn(P0),fn(P1),fn(P2),fn(P3),s),th=M(p=>p.th);
+  let c=[M(p=>p.c[0]),M(p=>p.c[1])];
+  if(P2.pv&&!P2.trav){const sup=P1.wL?'L':'R',kk=sup==='L'?FS:-FS,cp=a=>{const q=vec(a);return[P1[sup][0]+q.r[0]*kk,P1[sup][2]+q.r[1]*kk]};
+    const e=ease(s),a0=cp(P1.th),a1=cp(P2.th),ct=cp(th);
+    c=[ct[0]+(P1.c[0]-a0[0])*(1-e)+(P2.c[0]-a1[0])*e,ct[1]+(P1.c[1]-a0[1])*(1-e)+(P2.c[1]-a1[1])*e]}
+  return{th,c}}
+// Everything about where a dancer's body is right now: facing, hips, both feet, and the centre of the chest.
+function kin(w){
+  const a=NL?Math.min(Math.floor(t),N-1):Math.floor(t)%N,s=NL?Math.min(t-a,1):t-Math.floor(t);
+  const P1=get(a,w),P2=get(a+1,w),{th,c}=cthAt(w),v=vec(th),sm=s*s*(3-2*s),lf=[-v.r[0],-v.r[1]];
+  const stepSide=P1.wL!==P2.wL?(P2.wL?'L':'R'):null;
+  const foot=sd=>{
+    const A=P1[sd],Bf=P2[sd],moved=Math.hypot(A[0]-Bf[0],A[2]-Bf[2])>.03;
+    const bq=lerp3(A,Bf,ease(s));if(moved)bq[1]+=.05*Math.sin(Math.PI*s);
+    if(!(moved&&P2.pv))return bq;
+    // a real step: the foot stays on the floor at first, then lifts, travels and lands on the count
+    const k=sd==='L'?FS:-FS,u=clamp((s-.2)/.8,0,1),wg=1-Math.pow(1-u,3);
+    const e=P2.trav?ease(u):wg,tx=P2.trav?Bf[0]:c[0]+lf[0]*k,tz=P2.trav?Bf[2]:c[1]+lf[1]*k;let px=lerp(A[0],tx,e),pz=lerp(A[2],tz,e);
+    // don't kick your own ankle: if the straight path passes close to the standing foot, swing the foot around it
+    {const S=P1[sd==='L'?'R':'L'],dx=Bf[0]-A[0],dz=Bf[2]-A[2],l2=dx*dx+dz*dz,q=clamp(((S[0]-A[0])*dx+(S[2]-A[2])*dz)/l2,0,1);
+      let nx=A[0]+dx*q-S[0],nz=A[2]+dz*q-S[2];const d=Math.hypot(nx,nz),need=.24;
+      if(d<need&&q>.08&&q<.92){if(d<.01){const fl=Math.sqrt(l2),sgn=((A[0]-S[0])*v.f[0]+(A[2]-S[2])*v.f[1])>=0?1:-1;nx=-dz/fl;nz=dx/fl;if((nx*v.f[0]+nz*v.f[1])*sgn<0){nx=-nx;nz=-nz}}else{nx/=d;nz/=d}
+        const bow=(need-d)*Math.sin(Math.PI*e);px+=nx*bow;pz+=nz*bow}}
+    return[px,lerp(A[1],Bf[1],u)+(P2.trav?.07:.08)*Math.sin(Math.PI*u),pz];
+  };
+  const L=foot('L'),R=foot('R'),fm=[(L[0]+R[0])/2,(L[2]+R[2])/2],ubk=.3+.55*lerp(P1.pv?1:0,P2.pv?1:0,sm);
+  return{th,c,L,R,ch:[fm[0]+(c[0]-fm[0])*ubk,fm[1]+(c[1]-fm[1])*ubk]}}
+function pose(w,oc){
+  const a=NL?Math.min(Math.floor(t),N-1):Math.floor(t)%N,s=NL?Math.min(t-a,1):t-Math.floor(t);
+  const P0=get(a-1,w),P1=get(a,w),P2=get(a+1,w),P3=get(a+2,w);
+  const M=fn=>mono(fn(P0),fn(P1),fn(P2),fn(P3),s);
+  const KN=kin(w),{th,c}=KN,v=vec(th),sm=s*s*(3-2*s),lf=[-v.r[0],-v.r[1]],other=kin(w==='l'?'f':'l');
+  const hands={},joined={};
+  // A hand that is on a body at either end of this count travels WITH that body (it is interpolated in the body's own frame),
+  // so it goes around a turning partner instead of cutting through them. The partner's body wins over your own.
+  const ow0=w==='l'?'f':'l',OK=[get(a-1,ow0),get(a,ow0),get(a+1,ow0),get(a+2,ow0)],SK=[P0,P1,P2,P3],ancW={};
+  for(const sd of['L','R']){joined[sd]=(s<.5?P1:P2).J[sd];const x=P1.A[sd],y=P2.A[sd],an=x===y?x:(x&&x!==w?x:(y&&y!==w?y:(x||y)));
+    ancW[sd]=(x&&x!==w?1-sm:0)+(y&&y!==w?sm:0);
+    if(an){const KS=an===w?SK:OK,B=an===w?{th,c}:other,q=vec(B.th);
+      const loc=k=>{const Bk=KS[k],p=SK[k].H[sd],qk=vec(Bk.th),dx=p[0]-Bk.c[0],dz=p[2]-Bk.c[1];return[dx*qk.r[0]+dz*qk.r[1],dx*qk.f[0]+dz*qk.f[1],p[1]]};
+      // ...and it goes AROUND that body: angle and distance from the body's axis are interpolated, not a straight line through it
+      const L=[loc(0),loc(1),loc(2),loc(3)],ang=L.map(p=>Math.atan2(p[0],p[1])),rad=L.map(p=>Math.hypot(p[0],p[1])),wr=d=>Math.atan2(Math.sin(d),Math.cos(d));
+      ang[2]=ang[1]+wr(ang[2]-ang[1]);ang[0]=ang[1]+wr(ang[0]-ang[1]);ang[3]=ang[2]+wr(ang[3]-ang[2]);
+      const A=mono(ang[0],ang[1],ang[2],ang[3],s),Rr=mono(rad[0],rad[1],rad[2],rad[3],s),ly=mono(L[0][2],L[1][2],L[2][2],L[3][2],s),l=[Math.sin(A)*Rr,Math.cos(A)*Rr];
+      hands[sd]=[B.c[0]+q.r[0]*l[0]+q.f[0]*l[1],ly,B.c[1]+q.r[1]*l[0]+q.f[1]*l[1]]}
+    else hands[sd]=[0,1,2].map(i=>M(p=>p.H[sd][i]))}
+  const amp=p=>FL.stiff&&w==='l'?0:(p.tap?.05:.035)*(p.turn?.45:1);
+  let headTh=th;
+  const turning=P1.turn||P2.turn,noSpot=FL.noSpot&&w==='l';
+  if(turning&&!noSpot&&oc){const toO=Math.atan2(oc[0]-c[0],oc[1]-c[1])/R;headTh=th+clamp(wrapDeg(toO-th),-95,95)}
+  const stiff=FL.stiff&&w==='l',sN=Math.min(1,s+.03),sP=Math.max(0,s-.03),av=(mono(P0.th,P1.th,P2.th,P3.th,sN)-mono(P0.th,P1.th,P2.th,P3.th,sP))/(sN-sP);
+  const fhead=sd=>{if(!P1.turn&&!P2.turn)return th;const F1=P1['f'+sd],F2=P2['f'+sd],supp=sd===(P1.wL?'L':'R');
+    const h=supp?clamp(F1,th-50,th+50):clamp(lerp(F1,F2,ease(clamp((s-.2)/.8,0,1))),th-70,th+70);
+    return P2.turn?h:lerp(h,th,sm)};
+  // REACH: an arm is 66 cm of bone plus the hand. No hand may be asked to go further than that from its own shoulder, and joined
+  // hands must be somewhere BOTH dancers can reach. Out-of-reach targets are pulled in (leader's reach first, then hers, repeated).
+  {const shAt=(B,ww,sd)=>{const q=vec(B.th),k=DIMS[ww].shW*(sd==='L'?-1:1);return[B.ch[0]+q.r[0]*k,1.38,B.ch[1]+q.r[1]*k]},me=KN,RCH=.68;
+    const pull=(T,S)=>{const d=[T[0]-S[0],T[1]-S[1],T[2]-S[2]],l=Math.hypot(...d);return l>RCH?[S[0]+d[0]*RCH/l,S[1]+d[1]*RCH/l,S[2]+d[2]*RCH/l]:T};
+    // ...and a hand is never INSIDE a body. If the only reachable spot is inside someone, the hand slides round to the nearest
+    // point on their surface instead (this wins over reach).
+    const outOf=(T,B,lead)=>{const g=bodyGap(T,B,lead?'l':'f',.046);return g?[T[0]+g[1]*g[0],T[1],T[2]+g[2]*g[0]]:T};
+    const lB=w==='l'?me:other,fB=w==='f'?me:other;
+    for(const sd of['L','R']){const ps=(s<.5?P1:P2).JP[sd],mine=shAt(me,w,sd);let T=hands[sd];
+      // if the spot on the surface is still out of reach, walk it round the body toward the shoulder that can't reach it
+      const round=(T,B,S)=>{const d=Math.hypot(T[0]-S[0],T[1]-S[1],T[2]-S[2]);if(d<=RCH+.004)return T;const dx=T[0]-B.c[0],dz=T[2]-B.c[1],r=Math.hypot(dx,dz);if(r>.3)return T;
+        const aT=Math.atan2(dz,dx),aS=Math.atan2(S[2]-B.c[1],S[0]-B.c[0]),df=Math.atan2(Math.sin(aS-aT),Math.cos(aS-aT)),st=clamp(df,-.3,.3),a=aT+st;return[B.c[0]+Math.cos(a)*r,T[1],B.c[1]+Math.sin(a)*r]};
+      if(ps){const his=w==='l'?mine:shAt(other,'l',ps),hers=w==='f'?mine:shAt(other,'f',ps);
+        for(let i=0;i<8;i++){T=pull(T,his);T=pull(T,hers);T=outOf(T,fB,false);T=outOf(T,lB,true);T=round(T,fB,his);T=round(T,lB,hers);T=outOf(T,fB,false);T=outOf(T,lB,true)}}
+      else{const oB=w==='l'?fB:lB;for(let i=0;i<6;i++){T=pull(T,mine);T=outOf(T,fB,false);T=outOf(T,lB,true);T=round(T,oB,mine);T=outOf(T,fB,false);T=outOf(T,lB,true)}}
+      hands[sd]=T}}
+  return{ancW,oth:other.th,och:other.ch,occ:other.c,fth:{L:fhead('L'),R:fhead('R')},ub:lerp(P1.pv?1:0,P2.pv?1:0,sm),oc,av,th,v,c,L:KN.L,R:KN.R,hands,joined,wL:s<.5?P1.wL:P2.wL,headTh,headPitch:FL.lookDown&&w==='l'?.65:0,stiff,
+    wgt:lerp(P1.wL?1:-1,P2.wL?1:-1,sm),amp:lerp(amp(P1),amp(P2),sm),bob:stiff?0:-.03*Math.sin(Math.PI*s)};
+}
+function ik(A,Bp,len,dir){
+  const d=[Bp[0]-A[0],Bp[1]-A[1],Bp[2]-A[2]],dl=Math.hypot(...d)||1e-6,u=d.map(x=>x/dl);
+  const half=Math.min(dl/2,len*.999),h=Math.sqrt(Math.max(0,len*len-half*half));
+  const dot=dir[0]*u[0]+dir[1]*u[1]+dir[2]*u[2];let p=dir.map((x,i)=>x-u[i]*dot);const pl=Math.hypot(...p)||1;p=p.map(x=>x/pl);
+  return[A[0]+u[0]*dl/2+p[0]*h,A[1]+u[1]*dl/2+p[1]*h,A[2]+u[2]*dl/2+p[2]*h];
+}
+function shade(hex,k){const n=parseInt((hex||'#888888').replace('#','').slice(0,6),16);let r=n>>16,g=n>>8&255,bl=n&255;const tg=k<0?0:255,m=Math.abs(k);
+  r=Math.round(r+(tg-r)*m);g=Math.round(g+(tg-g)*m);bl=Math.round(bl+(tg-bl)*m);return`rgb(${r},${g},${bl})`}
+function tint(c,k){let m;if(c.startsWith('#')){const n=parseInt(c.slice(1,7),16);m=[n>>16,n>>8&255,n&255]}else m=c.match(/\d+/g).map(Number);
+  return`rgb(${Math.min(255,Math.round(m[0]*k))},${Math.min(255,Math.round(m[1]*k))},${Math.min(255,Math.round(m[2]*k))})`}
+const darker=c=>tint(c,.8);
+// Body sizes in meters. The collision checker reads the same numbers the figures are drawn with.
+const FS=.082,LEG=.455; // half the distance between the feet when standing, and the length of thigh and shin
+const DIMS={
+  l:{shW:.195,hipW:.095,head:.1,neck:.044,thigh:[.076,.054],shin:[.052,.034],upper:[.048,.04],fore:[.038,.03],hand:.029,torso:[.078,.085]},
+  f:{shW:.138,hipW:.095,head:.095,neck:.037,thigh:[.07,.048],shin:[.045,.029],upper:[.036,.03],fore:[.029,.023],hand:.025,torso:[.064,.072]}};
+// Torso outline per dancer: [height 0..1 from hips to shoulders, half width, depth radius, how far forward]. Drawn by body(), and
+// used by bodyGap() so hands and arms know where the partner's surface really is.
+const PROFS={l:[[0,.092,.08,0],[.16,.095,.077,0],[.36,.095,.072,0],[.56,.105,.078,.004],[.78,.122,.083,.006],[.92,.138,.074,0],[1,.146,.06,0]],f:[[0,.085,.086,0],[.18,.078,.08,0],[.38,.052,.062,0],[.52,.058,.064,.004],[.7,.074,.073,.015],[.84,.084,.06,.008],[.94,.098,.05,0],[1,.104,.046,0]]};
+// How deep is point q inside a dancer's torso (plus clear of room)? Returns null if outside, else [depth, nx, nz] with the way out.
+// B = {c,th} of that dancer. Each height is a flat bar with round ends, as drawn.
+function bodyGap(q,B,who,clear){
+  if(q[1]<.55||q[1]>1.5)return null;const v=vec(B.th),u=(q[1]-.9)/.48,uc=clamp(u,0,1),cx=B.ch?lerp(B.c[0],B.ch[0],uc):B.c[0],cz=B.ch?lerp(B.c[1],B.ch[1],uc):B.c[1]; // the torso leans from hips to chest
+  const dx=q[0]-cx,dz=q[2]-cz,xl=dx*v.r[0]+dz*v.r[1],xd=dx*v.f[0]+dz*v.f[1];
+  let h,r,fw=0;
+  if(u<0){if(who==='f'){h=0;r=lerp(.178,.2,clamp(-u/.7,0,1))}else{h=.09;r=.085}} // below the hips: her skirt, his thighs
+  else{const PR=PROFS[who];let i=0;const uu=Math.min(u,1);while(i<PR.length-2&&PR[i+1][0]<uu)i++;const A=PR[i],C=PR[i+1],k=clamp((uu-A[0])/(C[0]-A[0]),0,1);h=lerp(A[1],C[1],k);r=lerp(A[2],C[2],k);fw=lerp(A[3],C[3],k);
+    if(u>1){const k2=clamp((u-1)/.25,0,1);h*=1-k2*.8;r=lerp(r,.05,k2)}} // above the shoulders it narrows to the neck
+  const ex=Math.abs(xl)>h?xl-Math.sign(xl)*h:0,ez=xd-fw,d=Math.hypot(ex,ez),R=r+clear;if(d>=R)return null;
+  let nl=ex,nd=ez;if(d<1e-4){nl=0;nd=xd>=fw?1:-1}else{nl/=d;nd/=d}
+  return[R-d,v.r[0]*nl+v.f[0]*nd,v.r[1]*nl+v.f[1]*nd]}
+function body(P,col,items,isLead){
+  const id=isLead?'l':'f',D=DIMS[id],v=P.v,lf=[-v.r[0],-v.r[1]],hy=P.stiff?.958:.9+P.bob,tilt=P.wgt*P.amp;
+  const shW=D.shW,hipW=D.hipW;
+  const hL=[P.c[0]+lf[0]*hipW,hy+tilt,P.c[1]+lf[1]*hipW],hR=[P.c[0]-lf[0]*hipW,hy-tilt,P.c[1]-lf[1]*hipW];
+  const fm=[(P.L[0]+P.R[0])/2,(P.L[2]+P.R[2])/2],ubk=.3+.55*(P.ub||0),sc=[fm[0]+(P.c[0]-fm[0])*ubk,fm[1]+(P.c[1]-fm[1])*ubk];
+  const cy=(P.stiff?1.43:1.38+P.bob*.6),lean=P.headPitch?.05:0;
+  const chest=[sc[0]+v.f[0]*lean,cy,sc[1]+v.f[1]*lean];
+  const sL=[chest[0]+lf[0]*shW,cy-tilt*.4,chest[2]+lf[1]*shW],sR=[chest[0]-lf[0]*shW,cy+tilt*.4,chest[2]-lf[1]*shW];
+  const pel=[P.c[0],hy,P.c[1]],wy=(hy+cy)/2+.03;
+  const waist=[(pel[0]+chest[0])/2+v.f[0]*.02,wy,(pel[2]+chest[2])/2+v.f[1]*.02];
+  const hv=vec(P.headTh),HR=D.head,head=[chest[0]+hv.f[0]*(.02+lean),cy+.222-lean*.6,chest[2]+hv.f[1]*(.02+lean)];
+  const skin=colors.skin||'#E6C1A3',hair=colors.hair||'#2A1F1C',pants=isLead?tint(col,.45):skin,shoe='#221C26',fwd=[v.f[0],0,v.f[1]];
+  const cap=(a,b,wa,wb,c,side,ex)=>items.push({t:'c',a,b,wa,wb,col:c,side,id,lead:isLead,...ex});
+  const dot=(p,r,c,ex)=>items.push({t:'o',p,r,col:c,side:'C',id,lead:isLead,...ex});
+  const poly=(pts,c,ex)=>items.push({t:'p',pts,col:c,side:'C',id,lead:isLead,...ex});
+  const TG={torso:1,tg:1};
+  // --- legs
+  for(const [hp,ft,sd] of [[hL,P.L,'L'],[hR,P.R,'R']]){
+    const k=ik(hp,ft,LEG,fwd),ank=[ft[0],ft[1]+.06,ft[2]];
+    cap(hp,k,D.thigh[0],D.thigh[1],pants,sd,{part:'thigh'});cap(k,ank,D.shin[0],D.shin[1],pants,sd,{part:'shin'});
+    const fv=P.fth?vec(P.fth[sd]).f:v.f,at=(a,y)=>[ft[0]+fv[0]*a,ft[1]+y,ft[2]+fv[1]*a];
+    if(isLead){cap(at(-.065,.04),at(.16,.032),.04,.034,shoe,sd);cap(at(-.07,.012),at(.17,.012),.012,.012,tint(shoe,.6),sd,{flat:1})} // shoe and sole
+    else{cap(at(-.035,.055),at(.13,.02),.027,.021,skin,sd);cap(at(.04,.022),at(.145,.016),.026,.02,shoe,sd); // foot, then the toe of the shoe
+      cap(at(-.045,.06),at(-.035,.035),.022,.02,shoe,sd,{flat:1});cap(at(-.045,.05),at(-.05,.004),.009,.006,shoe,sd,{flat:1})} // heel cup and heel
+  }
+  // --- torso: horizontal bars stacked from hips to shoulders, plus a spine capsule. They share one gradient, so they read as a single body.
+  const mix=(a,b,k)=>[a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k,a[2]+(b[2]-a[2])*k];
+  const bar=(u,k,r,c,fw)=>{const A=mix(hL,sL,u),B=mix(hR,sR,u),m=mix(A,B,.5),f=fw||0;
+    const a=[m[0]+(A[0]-m[0])*k+v.f[0]*f,A[1],m[2]+(A[2]-m[2])*k+v.f[1]*f],b=[m[0]+(B[0]-m[0])*k+v.f[0]*f,B[1],m[2]+(B[2]-m[2])*k+v.f[1]*f];cap(a,b,r,r,c,'C',TG);return[a,b]};
+  // profile: [height 0..1 from hips to shoulders, half width, depth radius, how far forward]
+  const PROF=PROFS[id];
+  const prof=u=>{let i=0;while(i<PROF.length-2&&PROF[i+1][0]<u)i++;const A=PROF[i],B=PROF[i+1],k=clamp((u-A[0])/(B[0]-A[0]),0,1);return[lerp(A[1],B[1],k),lerp(A[2],B[2],k),lerp(A[3],B[3],k)]};
+  const lineHalf=u=>hipW+(shW-hipW)*u,edgeL=[],edgeR=[];
+  for(let i=0;i<=14;i++){const u=i/14,[h,r,fw]=prof(u),c=isLead?col:(u>.87?skin:col),e=bar(u,h/lineHalf(u),r,c,fw);edgeL.push(e[0]);edgeR.unshift(e[1])}
+  poly([...edgeL,...edgeR],col,TG); // his shirt hangs over the hips, so its hem is one clean curve
+  if(isLead){
+    cap(pel,chest,D.torso[0],D.torso[1],col,'C',{...TG,part:'torso'});
+    cap([chest[0],cy+.01,chest[2]],[chest[0],cy+.08,chest[2]],.075,.05,col,'C',TG); // collar
+  }else{
+    cap(waist,chest,D.torso[0],D.torso[1],col,'C',{...TG,part:'torso'});
+    // skirt: fitted from the waist over the hips, then flaring to the hem
+    const fl=.18+Math.min(.045,Math.abs(P.av)/1500),wyS=mix(hL,sL,.4)[1],n=18,sw=clamp(P.av/700,-.13,.13);
+    items.push({t:'x',a:[pel[0],hy,pel[2]],b:[pel[0],.6,pel[2]],ra:.15,rb:fl*.85,part:'skirt',id});
+    const ring=(r,y,ox,oz,wv)=>[...Array(n+1).keys()].map(i=>{const a=i/n*6.283;return[pel[0]+ox+Math.cos(a)*r,y+(wv?.014*Math.sin(3*a+t*3):0),pel[2]+oz+Math.sin(a)*r]});
+    const r0=ring(.112,wyS,(waist[0]-pel[0])*.5,(waist[2]-pel[2])*.5,0),r1=ring(.172,hy-.02,0,0,0),r2=ring(fl,.56,lf[0]*sw,lf[1]*sw,1),ctr=[pel[0],.78,pel[2]];
+    for(let i=0;i<n;i++){const c=tint(col,(.93+.15*Math.cos((i+.5)/n*6.283+2.3))*(i%2?.97:1));
+      poly([r0[i],r0[i+1],r1[i+1],r1[i]],c,{skirt:1,ctr});poly([r1[i],r1[i+1],r2[i+1],r2[i]],c,{skirt:1,ctr})}
+  }
+  // --- neck and head
+  const nb=[head[0],head[1]-HR*.75,head[2]];
+  cap(chest,nb,D.neck*.7,D.neck*.7,skin,'C',{torso:1,part:'neck'});
+  cap([chest[0],cy+.02,chest[2]],nb,D.neck*1.45,D.neck*1.05,skin,'C',{torso:1,ne:1}); // wider where it meets the shoulders
+  // --- arms
+  for(const sd of['L','R']){const s=sd==='L'?sL:sR,o=sd==='L'?1:-1;let h=P.hands[sd];
+    if(P.joined[sd])h=[h[0],h[1]+(isLead?-.014:.014),h[2]]; // his palm underneath, her hand resting on top
+    // A hand that rests ON the partner lies flat on them: the wrist is lifted off the body and bends, like a real wrist.
+    const cw=P.oc&&P.ancW?P.ancW[sd]:0,onP=cw>.001;let out=[0,0,0],hT=h; // cw: how much this hand is resting on the partner right now (0 to 1)
+    if(onP){const ox=h[0]-P.oc[0],oz=h[2]-P.oc[1],ol=Math.hypot(ox,oz)||1;out=[ox/ol,0,oz/ol];
+      const d0=[h[0]-s[0],h[1]-s[1],h[2]-s[2]],dl=Math.hypot(...d0)||1;hT=[h[0]+(out[0]*.045-d0[0]/dl*.04)*cw,h[1]-d0[1]/dl*.04*cw,h[2]+(out[2]*.045-d0[2]/dl*.04)*cw]}
+    const rs=clamp((hT[1]-1.3)/.5,0,1),eo=(isLead?.6:.3)+rs*1.2,fEnd=lerp(.72,.97,cw);
+    // Where does the elbow go? Shoulder and wrist are fixed, so the elbow can sit anywhere on a circle around the line between them.
+    // Every position on that circle is scored: stay near the natural hang of the arm, and keep both bones out of the partner's
+    // body, out of your own head and in front of your own chest. The result is a smooth blend of the good positions.
+    const nat=[lf[0]*o*eo-v.f[0]*.25*(1-rs),-(1-rs)+rs*.3,lf[1]*o*eo-v.f[1]*.25*(1-rs)],BL=.33;
+    const ax=[hT[0]-s[0],hT[1]-s[1],hT[2]-s[2]],al=Math.hypot(...ax)||1e-6,au=ax.map(x=>x/al),half=Math.min(al/2,BL*.999),rc=Math.sqrt(Math.max(0,BL*BL-half*half));
+    const md=[s[0]+au[0]*half,s[1]+au[1]*half,s[2]+au[2]*half],nd=nat[0]*au[0]+nat[1]*au[1]+nat[2]*au[2];
+    let u1=[nat[0]-au[0]*nd,nat[1]-au[1]*nd,nat[2]-au[2]*nd];{const l=Math.hypot(...u1);u1=l>1e-6?u1.map(x=>x/l):[lf[0]*o,0,lf[1]*o]}
+    const u2=[au[1]*u1[2]-au[2]*u1[1],au[2]*u1[0]-au[0]*u1[2],au[0]*u1[1]-au[1]*u1[0]];
+    // the partner's body is an oval column: wide across the shoulders, shallow front to back, narrower at her waist
+    const need=HR+.05,oB=P.oc?{c:P.occ||P.oc,ch:P.och,th:P.oth==null?0:P.oth}:null,oW=isLead?'f':'l',oHead=oB?(()=>{const q=vec(oB.th),cc=oB.ch||oB.c;return[cc[0]+q.f[0]*.02,1.6,cc[1]+q.f[1]*.02]})():null,oHR=DIMS[oW].head+.05;
+    const inside=q=>{if(!oB)return null;if(q[1]>1.42){const dx=q[0]-oHead[0],dy=q[1]-oHead[1],dz=q[2]-oHead[2],d=Math.hypot(dx,dy,dz);if(d<oHR){const dh=Math.hypot(dx,dz)||1e-6;return[oHR-d,dx/dh,dz/dh]}} // the partner's head
+      return bodyGap(q,oB,oW,.042)}; // the partner's body, as it is drawn
+    const cost=e=>{let pen=0;
+      for(const [a,b,end] of [[s,e,1],[e,hT,fEnd]])for(let k=1;k<=6;k++){const u=k/6*end,q=[a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,a[2]+(b[2]-a[2])*u];
+        const ins=inside(q);if(ins)pen+=ins[0]*ins[0];
+        const dh=Math.hypot(q[0]-head[0],q[1]-head[1],q[2]-head[2]);if(dh<need)pen+=(need-dh)*(need-dh)*2}
+      const fd=(e[0]-P.c[0])*v.f[0]+(e[2]-P.c[1])*v.f[1],sdw=Math.abs((e[0]-P.c[0])*lf[0]+(e[2]-P.c[1])*lf[1]);
+      if(fd<.05&&sdw<shW+.02&&e[1]<cy+.05)pen+=(.05-fd)*(.05-fd)*3; // the elbow doesn't go through your own back
+      return pen};
+    let acc=[0,0,0],wsum=0;const NA=28;
+    for(let i=0;i<NA;i++){const ph=i/NA*6.283,cs=Math.cos(ph),sn=Math.sin(ph),dir=[u1[0]*cs+u2[0]*sn,u1[1]*cs+u2[1]*sn,u1[2]*cs+u2[2]*sn];
+      const sc=.16*(1-cs)+420*cost([md[0]+dir[0]*rc,md[1]+dir[1]*rc,md[2]+dir[2]*rc]),w=Math.exp(-sc/.035);
+      acc[0]+=dir[0]*w;acc[1]+=dir[1]*w;acc[2]+=dir[2]*w;wsum+=w}
+    {const l=Math.hypot(...acc);acc=l>1e-9?acc.map(x=>x/l):u1}
+    let e=[md[0]+acc[0]*rc,md[1]+acc[1]*rc,md[2]+acc[2]*rc];
+    // last resort, when no elbow position is free: let the arm give a little and push the elbow clear
+    for(let it=0;it<6;it++){let moved=false;
+      for(const [a,b,end] of [[s,e,1],[e,hT,fEnd]]){const ab=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],l2=ab[0]**2+ab[1]**2+ab[2]**2||1e-9;
+        const u=clamp(((head[0]-a[0])*ab[0]+(head[1]-a[1])*ab[1]+(head[2]-a[2])*ab[2])/l2,0,1),cp=[a[0]+ab[0]*u,a[1]+ab[1]*u,a[2]+ab[2]*u];
+        const dv=[cp[0]-head[0],cp[1]-head[1],cp[2]-head[2]],d=Math.hypot(...dv);
+        if(d<need){const k=(need-d)*1.6/(d||1e-6);let dd=d>1e-4?dv:[lf[0]*o,0,lf[1]*o];if(d<=1e-4)dd=dd.map(x=>x*.01);e=[e[0]+dd[0]*k,e[1]+dd[1]*k,e[2]+dd[2]*k];moved=true}
+        for(let k=1;k<=6;k++){const uu=k/6*end,ins=inside([a[0]+(b[0]-a[0])*uu,a[1]+(b[1]-a[1])*uu,a[2]+(b[2]-a[2])*uu]);
+          if(ins){e=[e[0]+ins[1]*ins[0]*1.3,e[1],e[2]+ins[2]*ins[0]*1.3];moved=true}}}
+      if(!moved)break}
+    // bones don't stretch: at most 2 cm of give on each, however hard the elbow was pushed
+    for(let it=0;it<3;it++){const ds=Math.hypot(e[0]-s[0],e[1]-s[1],e[2]-s[2]);if(ds>BL+.02){const k=(BL+.02)/ds;e=[s[0]+(e[0]-s[0])*k,s[1]+(e[1]-s[1])*k,s[2]+(e[2]-s[2])*k]}
+      const dh=Math.hypot(e[0]-hT[0],e[1]-hT[1],e[2]-hT[2]);if(dh>BL+.02){const k=(BL+.02)/dh;e=[hT[0]+(e[0]-hT[0])*k,hT[1]+(e[1]-hT[1])*k,hT[2]+(e[2]-hT[2])*k]}}
+    const ac=isLead?col:skin;
+    dot(s,D.upper[0]*1.0,ac,{torso:1,ne:1,tg:1}); // the round of the shoulder, shaded with the torso so it doesn't read as a ball joint
+    dot(e,D.upper[1]*1.02,ac,{torso:1,side:sd,ne:1}); // elbow
+    const hd=[hT[0]-e[0],hT[1]-e[1],hT[2]-e[2]],hl=Math.hypot(...hd)||1,du=hd.map(x=>x/hl);
+    // free hand: wrist 6 cm before the palm, fingers straight on. Resting hand: wrist lifted off the body, fingers following the surface.
+    const wr=[hT[0]-du[0]*.06*(1-cw),hT[1]-du[1]*.06*(1-cw),hT[2]-du[2]*.06*(1-cw)];let tip=[h[0]+du[0]*.045,h[1]+du[1]*.045,h[2]+du[2]*.045];
+    if(onP){let f=[h[0]-wr[0],h[1]-wr[1],h[2]-wr[2]];const fo=f[0]*out[0]+f[2]*out[2];f=[f[0]-out[0]*fo,f[1],f[2]-out[2]*fo];const fl=Math.hypot(...f)||1;
+      tip=lerp3(tip,[h[0]+f[0]/fl*.05+out[0]*.022,h[1]+f[1]/fl*.05,h[2]+f[2]/fl*.05+out[2]*.022],cw)}
+    // the hand point is where the PALM is. The wrist sits before it, so two joined hands meet instead of passing through each other.
+    cap(s,e,D.upper[0],D.upper[1],ac,sd,{part:'upper'});cap(e,wr,D.fore[0],D.fore[1],skin,sd,{part:'fore'});
+    items.push({t:'o',p:h,r:D.hand,col:skin,side:sd,id,lead:isLead,hand:1,nod:1});
+    cap(wr,h,D.fore[1]*1.02,D.hand*.9,skin,sd,{ne:1,part:'hnd',onP});cap(h,tip,D.hand*.9,D.hand*.58,skin,sd,{part:'hnd',onP})} // palm, then fingers
+  // --- head: one shape (skull and jaw), drawn with a face by drawHead()
+  const fp=(f,s,y)=>[head[0]+hv.f[0]*HR*f+hv.r[0]*HR*s,head[1]+HR*y,head[2]+hv.f[1]*HR*f+hv.r[1]*HR*s];
+  items.push({t:'h',p:head,r:HR,col:skin,id,lead:isLead,side:'C',face:{fp,HR,hair,skin,isLead}});
+  if(isLead)dot(fp(-.24,0,.3),HR*1.0,hair,{torso:1});
+  else{dot(fp(-.27,0,.25),HR*1.05,hair,{torso:1});
+    // long hair down her back, one soft shape that swings out when she turns
+    const sw=clamp(-P.av/600,-.17,.17),base=fp(-.62,0,-.05);
+    const tip=[base[0]-hv.f[0]*(.035+Math.abs(sw)*.3)+lf[0]*sw,base[1]-.25+Math.abs(sw)*.15,base[2]-hv.f[1]*(.035+Math.abs(sw)*.3)+lf[1]*sw];
+    cap(base,tip,.082,.05,hair,'C',{torso:1,ne:1})}
+  return{id,sL,sR,hL,hR};
+}
+// Draws a head: skull and jaw as one outline, then eyes, brows, nose and mouth placed in 3D so they turn with the head.
+function drawHead(it,px){
+  const F=it.face,fp=F.fp,HR=F.HR,c=it.pp,r=px(HR,c[2]);if(r<2)return;
+  const J=proj(fp(.16,0,-.47)),rj=px(HR*.7,J[2]>0?J[2]:c[2]),skin=it.col,S=shades(skin);
+  const P3=(f,s,y)=>proj(fp(f,s,y)),front=q=>q[2]>0?clamp((c[2]-q[2])/HR-.22,0,.5)*2:0; // 0 = turned away, 1 = facing the viewer
+  const circ=(q,rad)=>{ctx.beginPath();ctx.arc(q[0],q[1],rad,0,6.283)};
+  for(const s of[-1,1]){const E=P3(-.02,s*1.0,-.08);if(E[2]>0&&E[2]>=c[2]-HR*.3){circ(E,r*.17);ctx.fillStyle=S.lo;ctx.fill()}} // ears behind the head
+  ctx.beginPath();ctx.arc(c[0],c[1],r,0,6.283);ctx.moveTo(J[0]+rj,J[1]);ctx.arc(J[0],J[1],rj,0,6.283);edge(skin,1.6);
+  const g=ctx.createRadialGradient(c[0]-r*.35,c[1]-r*.45,r*.1,c[0],c[1]-r*.1,r*1.75);g.addColorStop(0,S.hi);g.addColorStop(.5,skin);g.addColorStop(1,S.lo);
+  ctx.fillStyle=g;ctx.fill();
+  for(const s of[-1,1]){const E=P3(-.02,s*1.0,-.08);if(E[2]>0&&E[2]<c[2]-HR*.3){circ(E,r*.16);ctx.fillStyle=skin;ctx.fill();edge(skin,1)}} // an ear facing the viewer
+  ctx.lineCap='round';ctx.lineJoin='round';
+  const stroke=(pts,col,w,al)=>{const a=Math.min(...pts.map(front))*al;if(a<=.02)return;ctx.globalAlpha=a;ctx.strokeStyle=col;ctx.lineWidth=Math.max(1,w);ctx.beginPath();
+    ctx.moveTo(pts[0][0],pts[0][1]);if(pts.length===3)ctx.quadraticCurveTo(pts[1][0],pts[1][1],pts[2][0],pts[2][1]);else ctx.lineTo(pts[1][0],pts[1][1]);ctx.stroke();ctx.globalAlpha=1};
+  if(!F.isLead)for(const s of[-1,1]){const B=P3(.8,s*.56,-.3),a=front(B)*.2;if(a>.01){ctx.globalAlpha=a;circ(B,r*.19);ctx.fillStyle='#E0607C';ctx.fill();ctx.globalAlpha=1}} // a little colour on her cheeks
+  for(const s of[-1,1]){
+    const E=P3(.92,s*.36,.04),a=front(E);if(a>.02){const A=P3(.92,s*.36-.1,.04),B=P3(.92,s*.36+.1,.04),rx=Math.max(.6,Math.hypot(A[0]-B[0],A[1]-B[1])*.55),ry=r*(F.isLead?.105:.125);
+      ctx.globalAlpha=a;ctx.fillStyle='#2A2230';ctx.beginPath();ctx.ellipse(E[0],E[1],Math.min(rx,ry),ry,0,0,6.283);ctx.fill();
+      ctx.fillStyle='#fff';circ([E[0]-ry*.25,E[1]-ry*.35],ry*.3);ctx.fill();ctx.globalAlpha=1}
+    stroke([P3(.93,s*.17,.3),P3(.93,s*.38,F.isLead?.33:.37),P3(.85,s*.6,.28)],F.hair,r*(F.isLead?.085:.055),1); // brow
+  }
+  stroke([P3(.99,0,-.02),P3(1.1,0,-.24),P3(.97,0,-.28)],S.lo,r*.05,.9); // nose
+  stroke([P3(.88,-.25,-.56),P3(1.0,0,-.72),P3(.88,.25,-.56)],F.isLead?S.edge:'#B8485E',r*(F.isLead?.055:.075),F.isLead?.75:1); // a small smile
+}
+function proj(p){
+  if(pov&&cam){const d=[p[0]-cam.e[0],p[1]-cam.e[1],p[2]-cam.e[2]],z=d[0]*cam.f[0]+d[1]*cam.f[1]+d[2]*cam.f[2];if(z<.06)return[0,0,-1];
+    const x=d[0]*cam.r[0]+d[2]*cam.r[2],y=d[0]*cam.u[0]+d[1]*cam.u[1]+d[2]*cam.u[2];return[W/2+FOC*x/z,H*.5-FOC*y/z,z]}
+  const x=p[0]-tgt[0],y=p[1]-camY,z=p[2]-tgt[1],cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const x1=x*cy-z*sy,z1=x*sy+z*cy,y2=y*cp-z1*sp,z2=y*sp+z1*cp,d=3.4-z2;
+  return[W/2+FOC*x1/d,H*.6-FOC*y2/d,d];
+}
+const camZ=p=>(p[0]-cam.e[0])*cam.f[0]+(p[1]-cam.e[1])*cam.f[1]+(p[2]-cam.e[2])*cam.f[2];
+function seg2(a,b){if(!pov)return[proj(a),proj(b)];const n=.1,za=camZ(a),zb=camZ(b);if(za<n&&zb<n)return null;if(za<n)a=lerp3(a,b,(n-za)/(zb-za));else if(zb<n)b=lerp3(b,a,(n-zb)/(za-zb));return[proj(a),proj(b)]}
+function line(p,q){ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke()}
+function readColors(){const s=getComputedStyle(document.documentElement);for(const k of['ink','muted','lead','fol','floor','panel','join','bg','bad','skin','hair'])colors[k]=s.getPropertyValue('--'+k).trim()}
+
+// --- shading: every limb gets a soft light from the upper left and a thin darker edge, so overlapping parts stay readable
+const LIGHT=[-.55,-.83],shadeCache=new Map();
+function rgbOf(c){if(c.startsWith('#')){const n=parseInt(c.slice(1,7),16);return[n>>16,n>>8&255,n&255]}return c.match(/\d+/g).map(Number)}
+function shades(c){let s=shadeCache.get(c);if(!s){const m=rgbOf(c),f=(k,w)=>'rgb('+m.map(x=>Math.round(x*k+(255-x*k)*w)).join(',')+')';
+  s={hi:f(1,.2),lo:f(.74,0),edge:f(.5,0)};if(shadeCache.size>400)shadeCache.clear();shadeCache.set(c,s)}return s}
+function grad3(g,c){const s=shades(c);g.addColorStop(0,s.hi);g.addColorStop(.5,c);g.addColorStop(1,s.lo);return g}
+function capPath(p,q,ra,rb){const a=Math.atan2(q[1]-p[1],q[0]-p[0]);ctx.beginPath();ctx.arc(p[0],p[1],ra,a+Math.PI/2,a+Math.PI*1.5);ctx.arc(q[0],q[1],rb,a-Math.PI/2,a+Math.PI/2);ctx.closePath()}
+function capGrad(p,q,ra,rb,c){
+  const dx=q[0]-p[0],dy=q[1]-p[1],l=Math.hypot(dx,dy);let nx=LIGHT[0],ny=LIGHT[1];
+  if(l>1){nx=-dy/l;ny=dx/l;if(nx*LIGHT[0]+ny*LIGHT[1]<0){nx=-nx;ny=-ny}}
+  const R=Math.max(ra,rb),mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2;
+  return grad3(ctx.createLinearGradient(mx+nx*R,my+ny*R,mx-nx*R,my-ny*R),c)}
+function ballGrad(x,y,r,c){const s=shades(c),g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.08,x,y,r*1.05);g.addColorStop(0,s.hi);g.addColorStop(.55,c);g.addColorStop(1,s.lo);return g}
+function edge(c,w){ctx.strokeStyle=shades(c).edge;ctx.globalAlpha=.24;ctx.lineWidth=w;ctx.stroke();ctx.globalAlpha=1}
+function poseAt(tt,w,oc){const k=t;t=NL?clamp(tt,0,N):((tt%N)+N)%N;const p=pose(w,oc);t=k;return p}
+function arrowHead(a,b,col,size){const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l;
+  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(b[0]+ux*size,b[1]+uy*size);ctx.lineTo(b[0]-uy*size*.8,b[1]+ux*size*.8);ctx.lineTo(b[0]+uy*size*.8,b[1]-ux*size*.8);ctx.closePath();ctx.fill()}
+function polyPath(pts,col,w,dash){const pp=[];for(let i=0;i<pts.length-1;i++){const r=seg2(pts[i],pts[i+1]);if(!r)return null;if(!i)pp.push(r[0]);pp.push(r[1])}
+  ctx.strokeStyle=col;ctx.lineWidth=w;ctx.setLineDash(dash||[]);ctx.beginPath();pp.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke();ctx.setLineDash([]);return pp}
+function floorGuides(Pl,Pf,lc){
+  for(const [P,col,w,oc] of [[Pl,lc,'l',Pf.c],[Pf,colors.fol,'f',Pl.c]]){
+    const Pn=poseAt(t+1,w,oc),d=Pn.th-P.th;
+    if(Math.abs(d)>25){const pts=[];for(let i=0;i<=16;i++){const a=P.th+d*i/16,v=vec(a);pts.push([P.c[0]+v.f[0]*.4,.01,P.c[1]+v.f[1]*.4])}
+      const pp=polyPath(pts,col,3.5);if(pp&&pp.length>2)arrowHead(pp[pp.length-2],pp[pp.length-1],col,9)}
+  }
+  const k0=NL?Math.min(Math.floor(t),N-1):Math.floor(t)%N,B=keys[k0+1].l,tap=B.tap,sd=tap?(B.wL?'R':'L'):(B.wL?'L':'R'),f=B[sd],bv=vec(B.th),cur=Pl[sd];
+  const pts=[];for(let i=0;i<=20;i++){const a=i/20*6.283,u=.06+Math.cos(a)*.115,w=Math.sin(a)*.05;pts.push([f[0]+bv.f[0]*u+bv.r[0]*w,.004,f[2]+bv.f[1]*u+bv.r[1]*w])}
+  const pp=polyPath(pts,lc,2.5,tap?[5,4]:[]);
+  if(pp){if(!tap){ctx.fillStyle=lc;ctx.globalAlpha=.16;ctx.beginPath();pp.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.fill();ctx.globalAlpha=1}
+    if(Math.hypot(f[0]-cur[0],f[2]-cur[2])>.07){const r=seg2([cur[0],.004,cur[2]],[f[0],.004,f[2]]);if(r){ctx.strokeStyle=lc;ctx.lineWidth=2;line(r[0],r[1]);arrowHead(r[0],r[1],lc,6)}}
+    const q=proj([f[0]+bv.f[0]*.06,.004,f[2]+bv.f[1]*.06]);if(q[2]>0){const txt=sd+(tap?' tap':''),fs=13;ctx.font='700 '+fs+'px "Atkinson Hyperlegible",system-ui,sans-serif';
+      const tw=ctx.measureText(txt).width+12,x=q[0]-tw/2,y=q[1]+Math.max(14,.1*FOC/q[2]);ctx.fillStyle=colors.bg;ctx.strokeStyle=lc;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,tw,20,10):ctx.rect(x,y,tw,20);ctx.fill();ctx.stroke();
+      ctx.fillStyle=lc;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(txt,q[0],y+10.5)}}
+}
+function handGuide(Pl,Pf){
+  const pts=[];for(let i=0;i<=10;i++)pts.push(poseAt(t+i/10,'l',Pf.c).hands.L);
+  let len=0;for(let i=1;i<pts.length;i++)len+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1],pts[i][2]-pts[i-1][2]);
+  if(len<.12)return;const pp=polyPath(pts,colors.join,4);if(pp&&pp.length>2)arrowHead(pp[pp.length-2],pp[pp.length-1],colors.join,10);
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  const pf0=pose('f',null),Pl=pose('l',pf0.c),Pf=pose('f',Pl.c),lc=bad?colors.bad:colors.lead,items=[];
+  const ml=body(Pl,lc,items,true),mf=body(Pf,colors.fol,items,false);
+  FOC=pov?H*.48:H*1.28*zoom;tgt=[lerp(tgt[0],(Pl.c[0]+Pf.c[0])/2,.08),lerp(tgt[1],(Pl.c[1]+Pf.c[1])/2,.08)];
+  if(pov){const hd=items.find(i=>i.t==='h'&&i.lead),v=vec(Pl.headTh+lookY),p=lookP+Pl.headPitch,cp=Math.cos(p),sp=Math.sin(p);
+    cam={e:[hd.p[0]+v.f[0]*.04,hd.p[1]+.03,hd.p[2]+v.f[1]*.04],f:[v.f[0]*cp,-sp,v.f[1]*cp],r:[v.r[0],0,v.r[1]],u:[v.f[0]*sp,cp,v.f[1]*sp]}}
+  ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=1;ctx.strokeStyle=colors.floor;
+  {const gx=Math.round(tgt[0]/.25),gz=Math.round(tgt[1]/.25),fa=(x,z)=>clamp(1.25-Math.hypot(x-tgt[0],z-tgt[1])/1.45,0,1);
+   for(let i=-8;i<=8;i++){const g=(gx+i)*.25,h=(gz+i)*.25;for(let j=-8;j<8;j++){const a=(gz+j)*.25,b=(gx+j)*.25;
+     let al=fa(g,a+.125);if(al>.02){const s=seg2([g,0,a],[g,0,a+.25]);if(s){ctx.globalAlpha=al;line(s[0],s[1])}}
+     al=fa(b+.125,h);if(al>.02){const s=seg2([b,0,h],[b+.25,0,h]);if(s){ctx.globalAlpha=al;line(s[0],s[1])}}}}
+   ctx.globalAlpha=1}
+  for(const P of [Pl,Pf])for(const [r,al] of [[.3,.045],[.21,.06],[.13,.07]]){ctx.beginPath();let off=false;
+    for(let i=0;i<=20;i++){const q=proj([P.c[0]+Math.cos(i/20*6.283)*r,.001,P.c[1]+Math.sin(i/20*6.283)*r]);if(q[2]<0)off=true;i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}
+    if(!off){ctx.fillStyle='#000';ctx.globalAlpha=al;ctx.fill();ctx.globalAlpha=1}}
+  for(const [P,col] of [[Pl,lc],[Pf,colors.fol]])for(const side of['L','R']){
+    const f=side==='L'?P.L:P.R,w=(side==='L')===P.wL;if(!w)continue;ctx.beginPath();let off=false;
+    for(let i=0;i<=16;i++){const q=proj([f[0]+P.v.f[0]*.05+Math.cos(i/16*6.283)*.1,.002,f[2]+P.v.f[1]*.05+Math.sin(i/16*6.283)*.1]);if(q[2]<0)off=true;i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}
+    if(off)continue;ctx.fillStyle=col;ctx.globalAlpha=.22;ctx.fill();ctx.globalAlpha=1;
+  }
+  if(guides)floorGuides(Pl,Pf,lc);
+  const far={};for(const m of [ml,mf]){const a=proj(m.sL),b=proj(m.sR);far[m.id]=a[2]>b[2]?'L':'R'}
+  const px=(r,d)=>Math.max(1.5,Math.min(60,r*FOC/d));
+  for(const it of items){
+    if(it.t==='x'||it.nod||(pov&&it.lead&&(it.torso||it.t==='h'))){it.skip=1;continue}
+    if(it.t==='c'){const r=seg2(it.a,it.b);if(!r){it.skip=1;continue}it.p=r[0];it.q=r[1];it.d=(r[0][2]+r[1][2])/2}
+    else if(it.t==='p'){it.pp=it.pts.map(proj);if(it.pp.some(q=>q[2]<0)){it.skip=1;continue}it.d=it.pp.reduce((s,q)=>s+q[2],0)/it.pp.length+.02;
+      if(it.skirt){const dc=proj(it.ctr)[2];if(dc>0)it.d+=it.d<dc+.02?-.14:.14}} // the near half of the skirt always covers the legs, the far half is always behind them
+    else{it.pp=proj(it.p);it.d=it.pp[2];if(it.d<0)it.skip=1}
+  }
+  const vis=items.filter(i=>!i.skip).sort((x,y)=>y.d-x.d);
+  // the torso is several shapes: they share one left-to-right gradient so they read as a single body
+  const tbox={},tg=new Map(),tgrad=(id,c)=>{const k=id+c;let g=tg.get(k);if(!g){const b=tbox[id];g=grad3(ctx.createLinearGradient(b[0],0,b[1],0),c);tg.set(k,g)}return g};
+  for(const m of [ml,mf]){const xs=[m.sL,m.sR,m.hL,m.hR].map(q=>proj(q)),r=px(.11,xs[0][2]);tbox[m.id]=[Math.min(...xs.map(q=>q[0]))-r,Math.max(...xs.map(q=>q[0]))+r]}
+  for(const it of vis){
+    const dark=it.side!=='C'&&it.side===far[it.id],base=dark?darker(it.col):it.col;
+    const lim=pov&&it.lead?24:60;
+    if(it.t==='c'){const ra=Math.min(lim,px(it.wa,it.p[2])),rb=Math.min(lim,px(it.wb,it.q[2]));capPath(it.p,it.q,ra,rb);
+      ctx.fillStyle=it.flat?base:it.tg?tgrad(it.id,base):capGrad(it.p,it.q,ra,rb,base);ctx.fill();if(!it.tg&&!it.flat&&!it.ne&&Math.max(ra,rb)>3)edge(base,1)}
+    else if(it.t==='p'){ctx.beginPath();it.pp.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();
+      const f=it.tg?tgrad(it.id,base):base;ctx.fillStyle=f;ctx.fill();ctx.strokeStyle=f;ctx.lineWidth=.9;ctx.stroke()} // the stroke closes hairline gaps between neighbouring panels
+    else if(it.t==='h'&&it.face)drawHead(it,px);
+    else{const r=it.t==='o'?Math.min(lim,px(it.r,it.d)):px(it.r,it.d);ctx.beginPath();ctx.arc(it.pp[0],it.pp[1],r,0,6.283);
+      ctx.fillStyle=it.flat?base:it.tg?tgrad(it.id,base):ballGrad(it.pp[0],it.pp[1],r,base);ctx.fill();if(!it.flat&&!it.ne&&r>3)edge(base,1)}
+  }
+  if(guides)handGuide(Pl,Pf);
+  for(const side of['L','R'])if(Pl.joined[side]){const q=proj(Pl.hands[side]);if(q[2]<0)continue;ctx.strokeStyle=colors.join;ctx.lineWidth=3;ctx.beginPath();ctx.arc(q[0],q[1],px(.06,q[2]),0,6.283);ctx.stroke()}
+  if(pov){const m=80,x0=W-m-12,y0=H-m-12,cx=x0+m/2,cy=y0+m/2+8,sc=36,lv=vec(Pl.headTh);
+    ctx.fillStyle=colors.bg;ctx.strokeStyle=colors.floor;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect?ctx.roundRect(x0,y0,m,m,10):ctx.rect(x0,y0,m,m);ctx.fill();ctx.stroke();
+    const mp=p=>{const dx=p[0]-Pl.c[0],dz=p[1]-Pl.c[1];return[cx+(dx*lv.r[0]+dz*lv.r[1])*sc,cy-(dx*lv.f[0]+dz*lv.f[1])*sc]};
+    for(const [P,col] of [[Pl,lc],[Pf,colors.fol]]){const p=mp(P.c),q=mp([P.c[0]+P.v.f[0]*.25,P.c[1]+P.v.f[1]*.25]);ctx.strokeStyle=col;ctx.lineWidth=3;line(p,q);ctx.fillStyle=col;ctx.beginPath();ctx.arc(p[0],p[1],5,0,6.283);ctx.fill()}}
+}
+let motion=null,mt=0,mrate=.5,mmir=false,mswap=false,mbpm=0,moff=0,taps=[],mA=null,mB=null,mdur=0,mbeat=-1;
+const EDGES=[[5,6],[5,7],[7,9],[6,8],[8,10],[5,11],[6,12],[11,12],[11,13],[13,15],[12,14],[14,16]];
+const fmtT=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0')+'.'+Math.floor(x*10%10);
+function cleanMotion(obj){
+  const F=obj.frames,n=F.length,med=a=>{const b=a.slice().sort((x,y)=>x-y);return b.length?b[b.length>>1]:0};
+  const out=F.map(f=>({t:f.t,p:[null,null]}));let all=[],floor=[];
+  for(const sl of[0,1]){
+    const hs=F.map(f=>{const k=f.p[sl];if(!k)return 0;const ys=k.filter(q=>q[2]>.3).map(q=>q[1]);return ys.length>=6?Math.max(...ys)-Math.min(...ys):0});
+    const mh=med(hs.filter(h=>h>0)),okF=hs.map(h=>h>mh*.62);
+    const J=[];for(let j=0;j<17;j++){
+      const x=new Array(n).fill(null),y=new Array(n).fill(null);
+      for(let i=0;i<n;i++){const k=F[i].p[sl];if(okF[i]&&k&&k[j]&&k[j][2]>.35){x[i]=k[j][0];y[i]=k[j][1]}}
+      // drop single-frame jumps
+      for(let i=1;i<n-1;i++)if(x[i]!=null&&x[i-1]!=null&&x[i+1]!=null){const d1=Math.hypot(x[i]-x[i-1],y[i]-y[i-1]),d2=Math.hypot(x[i+1]-x[i-1],y[i+1]-y[i-1]);if(d1>mh*.18&&d2<d1*.5){x[i]=null;y[i]=null}}
+      // fill short gaps
+      let last=-1;for(let i=0;i<n;i++){if(x[i]==null)continue;if(last>=0&&i-last>1&&i-last<=9)for(let k=last+1;k<i;k++){const u=(k-last)/(i-last);x[k]=x[last]+(x[i]-x[last])*u;y[k]=y[last]+(y[i]-y[last])*u}last=i}
+      // smooth
+      const W5=[1,2,3,2,1],sx=x.slice(),sy=y.slice();
+      for(let i=0;i<n;i++){if(x[i]==null)continue;let a=0,b=0,w=0;for(let k=-2;k<=2;k++){const m=i+k;if(m<0||m>=n||x[m]==null)continue;a+=x[m]*W5[k+2];b+=y[m]*W5[k+2];w+=W5[k+2]}sx[i]=a/w;sy[i]=b/w}
+      J.push([sx,sy]);
+    }
+    for(let i=0;i<n;i++){const kp=J.map(q=>q[0][i]==null?[0,0,0]:[q[0][i],q[1][i],1]),cnt=kp.filter(q=>q[2]).length;
+      if(cnt>=8){out[i].p[sl]=kp;for(const q of kp)if(q[2])all.push(q);for(const j of[15,16])if(kp[j][2])floor.push(kp[j][1])}}
+  }
+  if(!all.length)throw new Error('empty');
+  const xs=all.map(q=>q[0]).sort((a,b)=>a-b),ys=all.map(q=>q[1]).sort((a,b)=>a-b),pc=(a,p)=>a[Math.min(a.length-1,Math.floor(a.length*p))];
+  let x0=pc(xs,.01),x1=pc(xs,.99),y0=pc(ys,.01),y1=pc(ys,.99);const px=(x1-x0)*.18+20,py=(y1-y0)*.16+20;
+  floor.sort((a,b)=>a-b);
+  return{...obj,frames:out,view:{x0:x0-px,x1:x1+px,y0:y0-py*1.3,y1:y1+py*.6},floorY:floor.length?pc(floor,.9):y1};
+}
+function loadMotion(obj,name){
+  if(!obj||!Array.isArray(obj.frames)||!obj.frames.length||!obj.width||!obj.height||!obj.frames.every(f=>Array.isArray(f.p)))throw new Error('bad file');
+  obj=cleanMotion(obj);motion=obj;mdur=obj.frames[obj.frames.length-1].t;mt=0;mbpm=0;moff=0;taps=[];mA=mB=null;mbeat=-1;setPlay(false);
+  bad=false;$('stage').classList.remove('bad');document.body.classList.add('motion');$('mbar').hidden=false;
+  chipBtns.forEach(b=>b.setAttribute('aria-pressed',false));$('mbpm').textContent='No beat set yet';$('mloop').textContent='';
+  $('about').textContent='Real motion from '+(obj.source||name)+' ('+fmtT(mdur)+'). These are the actual dancers from the video, traced as stick figures.';
+  $('cue').textContent='Play it slowly. Tap the beat, then mark count 1 to see the counts.';$('cue').classList.remove('bad');$('fix').textContent='';$('fix').hidden=true;$('nextCue').hidden=true;
+  $('mname').textContent='Real motion';$('eyebrow').textContent='From your video';$('cueEyebrow').textContent='Getting started';$('cueCard').classList.remove('bad');$('hint').textContent='';
+  $('dtitle').textContent='How to use real motion';
+  $('dlist').innerHTML=['Play at 0.5× and tap “Tap the beat” on every step for a few counts. Then pause on a count 1 and press “This is count 1.”','Use “Loop from here” and “Loop to here” to repeat a single move.','“Mirror” flips left and right, so you can follow along as if in a mirror.','If the colors are the wrong way round (you should be green), press “Swap colors.”'].map(x=>`<li>${x}</li>`).join('');
+  $('etitle').textContent='Good to know';
+  $('elist').innerHTML=['This is a flat view from the camera, not 3D: you can’t rotate it.','When the dancers overlap or turn, some joints get lost for a moment. That’s the tracking, not the dancing.'].map(x=>`<li>${x}</li>`).join('');
+}
+function exitMotion(){if(!motion)return;motion=null;document.body.classList.remove('motion');$('mbar').hidden=true;$('etitle').textContent='Common mistakes';$('hint').textContent=HINT;setPlay(false)}
+function mframe(){
+  const fr=motion.frames;let i=clamp(Math.floor(mt*motion.fps),0,fr.length-1);
+  while(i>0&&fr[i].t>mt)i--;while(i<fr.length-1&&fr[i+1].t<=mt)i++;
+  const a=fr[i],b=fr[Math.min(i+1,fr.length-1)],u=b.t>a.t?clamp((mt-a.t)/(b.t-a.t),0,1):0;
+  return[0,1].map(k=>{const pa=a.p[k],pb=b.p[k];if(!pa)return null;if(!pb)return pa;return pa.map((q,j)=>[q[0]+(pb[j][0]-q[0])*u,q[1]+(pb[j][1]-q[1])*u,Math.min(q[2],pb[j][2])])});
+}
+function drawMotion(){
+  ctx.clearRect(0,0,W,H);const vw=motion.view,vW=vw.x1-vw.x0,vH=vw.y1-vw.y0,sc=Math.min(W/vW,H/vH)*zoom,ox=(W-vW*sc)/2,oy=(H-vH*sc)/2;
+  const X=x=>ox+((mmir?vw.x1-(x-vw.x0):x)-vw.x0)*sc,Y=y=>oy+(y-vw.y0)*sc;ctx.lineCap='round';ctx.lineJoin='round';
+  const fy=Y(motion.floorY)+6;ctx.strokeStyle=colors.floor;ctx.lineWidth=2;line([W*.06,fy],[W*.94,fy]);
+  const ppl=mframe().map((kp,k)=>({kp,k})).filter(o=>o.kp).sort((a,b)=>{const m=o=>Math.max(...o.kp.filter(q=>q[2]>.3).map(q=>q[1]));return m(a)-m(b)});
+  for(const {kp,k} of ppl){const col=(k===0)!==mswap?colors.lead:colors.fol,dk=tint(col,.72),ok=j=>kp[j]&&kp[j][2]>.3,P=j=>[X(kp[j][0]),Y(kp[j][1])];
+    const tl=ok(5)&&ok(11)?Math.hypot(kp[5][0]-kp[11][0],kp[5][1]-kp[11][1]):(ok(6)&&ok(12)?Math.hypot(kp[6][0]-kp[12][0],kp[6][1]-kp[12][1]):(vH*.2)),u=tl*sc,lw=Math.max(4,u*.13);
+    const limb=(a,b,c,w)=>{if(ok(a)&&ok(b)){ctx.strokeStyle=c;ctx.lineWidth=w;line(P(a),P(b))}};
+    limb(11,13,dk,lw*1.1);limb(13,15,dk,lw*.95);limb(12,14,dk,lw*1.1);limb(14,16,dk,lw*.95);
+    for(const j of[15,16])if(ok(j)){const q=P(j);ctx.fillStyle=dk;ctx.beginPath();ctx.ellipse(q[0],q[1]+lw*.3,lw*1.1,lw*.55,0,0,6.283);ctx.fill()}
+    if(ok(5)&&ok(6)&&ok(11)&&ok(12)){ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=lw*1.2;ctx.beginPath();[5,6,12,11].forEach((j,i)=>{const q=P(j);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])});ctx.closePath();ctx.fill();ctx.stroke()}
+    else{limb(5,11,col,lw*1.6);limb(6,12,col,lw*1.6);limb(5,6,col,lw);limb(11,12,col,lw)}
+    limb(5,7,col,lw*.9);limb(7,9,col,lw*.8);limb(6,8,col,lw*.9);limb(8,10,col,lw*.8);
+    ctx.fillStyle=col;for(const j of[9,10])if(ok(j)){const q=P(j);ctx.beginPath();ctx.arc(q[0],q[1],lw*.6,0,6.283);ctx.fill()}
+    let hc=null;const ear=ok(3)&&ok(4)?[(P(3)[0]+P(4)[0])/2,(P(3)[1]+P(4)[1])/2]:null;
+    if(ear)hc=ear;else if(ok(0))hc=P(0);else if(ok(3))hc=P(3);else if(ok(4))hc=P(4);
+    if(hc){const r=u*.21;if(ok(5)&&ok(6)){const a=P(5),b=P(6);ctx.strokeStyle=col;ctx.lineWidth=lw*.8;line([(a[0]+b[0])/2,(a[1]+b[1])/2],hc)}ctx.fillStyle=col;ctx.beginPath();ctx.arc(hc[0],hc[1]-r*.1,r,0,6.283);ctx.fill()}
+  }
+}
+function mcount(){return mbpm?(((Math.floor((mt-moff)*mbpm/60+1e-6)%8)+8)%8)+1:0}
+function uiMotion(){
+  const c=mcount(),el=$('count'),tap=c===4||c===8;el.firstChild.nodeValue=c||'·';el.classList.toggle('tap',tap);
+  el.querySelector('small').textContent=fmtT(mt)+(tap?' · tap':'');
+  if(document.activeElement!==$('mscrub'))$('mscrub').value=mdur?mt/mdur:0;
+}
+function label(){if(NL)return clamp(Math.round(t),0,N);const c=Math.round(t)%N;return c===0?N:c}
+let shown=-1;
+function ui(force){
+  const c=label();if(c===shown&&!force)return;shown=c;
+  const m=moves[mi],st=NL&&c===0,k=st?m.start:m.keys[c-1],nc=c%N+1;
+  const tap=!st&&c%4===0,el=$('count');el.firstChild.nodeValue=c;el.classList.toggle('tap',tap);
+  el.querySelector('small').textContent=st?'start':m.combo?k.seg+(tap?' · tap':''):(tap?'tap':'of '+N);
+  $('cueEyebrow').textContent=st?'Starting position':(bad&&m.mistake?'Common mistake · count ':'Count ')+c+(tap?' · tap':'')+(m.combo?' · '+k.seg:'');
+  if(bad&&m.mistake){$('cue').textContent=m.mistake.what;$('cue').classList.add('bad');$('fix').innerHTML='<b>Fix:</b> '+m.mistake.fix;$('fix').hidden=false;$('nextCue').hidden=true}
+  else{$('cue').textContent=k.cue;$('cue').classList.remove('bad');$('fix').textContent='';$('fix').hidden=true;
+    const nx=$('nextCue');nx.hidden=false;nx.textContent='';const b=document.createElement('b');
+    if(NL&&c===N){b.textContent='Then: ';nx.append(b,'it starts again from the starting position.')}else{b.textContent='Next, count '+nc+': ';nx.append(b,m.keys[nc-1].cue)}}
+  [...$('beats').children].forEach((b,i)=>{b.classList.toggle('on',i+1===c);if(i+1===c)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current')});
+}
+function click(c){
+  if(!sound||!audio)return;const o=audio.createOscillator(),g=audio.createGain(),n=audio.currentTime;
+  o.frequency.value=c===1||c===9?1600:c%4===0?620:1050;g.gain.setValueAtTime(.25,n);g.gain.exponentialRampToValueAtTime(.001,n+.06);
+  o.connect(g).connect(audio.destination);o.start(n);o.stop(n+.07);
+}
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(.1,(now-last)/1000);last=now;
+  if(motion){
+    if(playing){mt+=dt*mrate;const en=mB!=null?mB:mdur,st=mA!=null?mA:0;if(mt>=en)mt=st;
+      if(mbpm){const bt=Math.floor((mt-moff)*mbpm/60+1e-6);if(bt!==mbeat){mbeat=bt;click((((bt%8)+8)%8)+1)}}}
+    drawMotion();uiMotion();requestAnimationFrame(loop);return}
+  if(playing){t+=dt*bpm/60;if(NL?t>N:t>=N)t-=N;const fl=Math.floor(t);if(fl!==lastFloor){lastFloor=fl;click(fl===0?N:fl)}}
+  draw();ui();requestAnimationFrame(loop);
+}
+function size(){
+  const r=$('stage').getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  W=r.width;H=Math.round(Math.min(Math.max(W*(W<520?.95:.8),300),Math.max(460,Math.min(700,window.innerHeight-(window.innerWidth>=900?330:170)))));cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function rebuild(){prepare();ui(true)}
+function selectMove(i){
+  exitMotion();
+  mi=i;t=0;lastFloor=0;const m=moves[i];
+  $('mBad').disabled=!m.mistake;$('mBad').title=m.mistake?'':'No mistake version for this one';if(!m.mistake&&bad){bad=false;markBad()}
+  rebuild();
+  chipBtns.forEach((b,j)=>b.setAttribute('aria-pressed',j===i));
+  const bt=$('beats');bt.innerHTML='';bt.classList.toggle('long',N>16);bt.style.gridTemplateColumns='repeat('+(N>16&&window.innerWidth>=700?16:8)+',1fr)';
+  for(let c=1;c<=N;c++){const b=document.createElement('button'),k=((c-1)%8)+1;b.className='beat'+(c%4===0?' tapc':'')+(m.combo&&m.keys[c-1].segStart?' seg0':'');b.textContent=c%4===0?'tap':(N>16?k:c);b.setAttribute('aria-label','Go to count '+c+(m.combo?' ('+m.keys[c-1].seg+')':''));if(m.combo)b.title=m.keys[c-1].seg;b.onclick=()=>{t=NL?c:c%N;lastFloor=Math.floor(t);setPlay(false)};bt.appendChild(b)}
+  $('mname').textContent=shortName(m);$('eyebrow').textContent=groupOf(m,i)+' · '+N+' counts';
+  $('about').textContent=m.about;
+  $('dtitle').textContent='Do this';
+  $('dlist').innerHTML=m.tips.map(x=>`<li>${x}</li>`).join('');
+  $('elist').innerHTML=m.errors.map(x=>`<li>${x}</li>`).join('');
+  ui(true);
+}
+const HINT='Drag to rotate · scroll to zoom';
+function markBad(){const b=bad;$('mGood').setAttribute('aria-pressed',!b);$('mBad').setAttribute('aria-pressed',b);$('stage').classList.toggle('bad',b);$('cueCard').classList.toggle('bad',b);$('youDot').style.background=b?'var(--bad)':'var(--lead)';$('hint').textContent=b?'Showing the common mistake':HINT}
+function setBad(b){if(b&&!moves[mi].mistake)return;bad=b;markBad();rebuild()}
+const ICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.500v13l11-6.500z" fill="currentColor"/></svg>',pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>'};
+const groupOf=(m,i)=>i<3?'Basics':m.combo?'Combos':/\(course\)/.test(m.name)?'From the course':'Moves';
+const shortName=m=>m.name.replace(' (course)','');
+function setPlay(p){playing=p;const pb=$('play');pb.querySelector('.ic').innerHTML=p?ICON.pause:ICON.play;pb.querySelector('.lb').textContent=p?'Pause':'Play';pb.setAttribute('aria-label',p?'Pause':'Play');if(p){if(!audio)try{audio=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}audio&&audio.resume&&audio.resume()}}
+{let lastG=null;moves.forEach((m,i)=>{
+  const g=groupOf(m,i);
+  if(g!==lastG){lastG=g;const sp=document.createElement('span');sp.className='chipsep';sp.textContent=g;$('chips').appendChild(sp)}
+  const b=document.createElement('button'),nm=document.createElement('span'),ct=document.createElement('span');b.className='chip';nm.className='nm';nm.textContent=shortName(m);ct.className='ct';ct.textContent=m.keys.length;ct.title=m.keys.length+' counts';
+  b.append(nm,ct);b.setAttribute('aria-label',shortName(m)+', '+m.keys.length+' counts');b.onclick=()=>{selectMove(i);if(window.innerWidth<1280)b.scrollIntoView({block:'nearest',inline:'center'})};$('chips').appendChild(b);chipBtns.push(b)})}
+{const sp=document.createElement('span');sp.className='chipsep';sp.textContent='Real motion';$('chips').appendChild(sp);
+ const lb=document.createElement('label');lb.className='chip file';lb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5M7.500 9.500L12 5l4.500 4.500M5 19h14"/></svg><span>Load motion file</span>';const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';inp.setAttribute('aria-label','Load a motion file made with extract_poses.py');lb.appendChild(inp);$('chips').appendChild(lb);
+ inp.onchange=()=>{const f=inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{loadMotion(JSON.parse(rd.result),f.name)}catch(e){$('cue').textContent='That file doesn’t look like a motion file. Make it with extract_poses.py and load the .poses.json it saves.'}inp.value=''};rd.readAsText(f)}}
+$('mscrub').oninput=e=>{setPlay(false);mt=+e.target.value*mdur};
+$('mrate').onchange=e=>{mrate=+e.target.value};
+$('mmir').onclick=e=>{mmir=!mmir;e.target.setAttribute('aria-pressed',mmir)};
+$('mswap').onclick=()=>{mswap=!mswap};
+$('mtap').onclick=()=>{if(taps.length&&Math.abs(mt-taps[taps.length-1])>3)taps=[];taps.push(mt);if(taps.length>9)taps.shift();
+  if(taps.length>=3){const iv=(taps[taps.length-1]-taps[0])/(taps.length-1);if(iv>.05){mbpm=60/iv;if(!moff)moff=taps[0];$('mbpm').textContent=Math.round(mbpm)+' BPM. Now pause on a 1 and mark it.'}}else $('mbpm').textContent='Keep tapping: '+taps.length+'…'};
+$('mone').onclick=()=>{if(!mbpm){$('mbpm').textContent='Tap the beat first (at least 3 taps).';return}moff=mt;mbeat=-1;$('mbpm').textContent=Math.round(mbpm)+' BPM, count 1 set.'};
+const loopTxt=()=>{$('mloop').textContent=mA!=null||mB!=null?'Loop '+fmtT(mA!=null?mA:0)+' → '+fmtT(mB!=null?mB:mdur):''};
+$('mA').onclick=()=>{mA=mt;if(mB!=null&&mB<=mA)mB=null;loopTxt()};
+$('mB').onclick=()=>{if(mt>(mA||0)+.2){mB=mt;mt=mA||0}loopTxt()};
+$('mclr').onclick=()=>{mA=mB=null;loopTxt()};
+$('mGood').onclick=()=>setBad(false);$('mBad').onclick=()=>setBad(true);
+$('play').onclick=()=>setPlay(!playing);
+$('prev').onclick=()=>step(-1);
+$('next').onclick=()=>step(1);
+$('snd').onclick=e=>{sound=!sound;e.currentTarget.setAttribute('aria-pressed',sound)};
+$('gd').onclick=e=>{guides=!guides;e.currentTarget.setAttribute('aria-pressed',guides)};
+const showBpm=()=>{$('bpmo').textContent=bpm+' BPM';document.querySelectorAll('.presets button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.bpm===bpm))};
+$('bpm').oninput=e=>{bpm=+e.target.value;showBpm()};
+document.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>setBpm(+b.dataset.bpm));
+$('zin').onclick=()=>{zoom=clamp(zoom*1.15,.6,2)};$('zout').onclick=()=>{zoom=clamp(zoom/1.15,.6,2)};
+$('themeBtn').onclick=()=>{const d=document.documentElement,n=d.getAttribute('data-theme')==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem('bpr-theme',n)}catch(e){}};
+$('helpBtn').onclick=()=>{setPlay(false);const h=$('help');h.showModal?h.showModal():h.setAttribute('open','')};
+$('helpClose').onclick=()=>$('help').close();
+$('help').addEventListener('click',e=>{if(e.target===$('help'))$('help').close()});
+const VIEWS={side:[.62,.36],you:[-1.15,.5],top:[0,1.35]};
+document.querySelectorAll('.views button').forEach(b=>b.onclick=()=>{pov=b.dataset.v==='pov';if(pov){lookY=0;lookP=.4}else[yaw,pitch]=VIEWS[b.dataset.v];document.querySelectorAll('.views button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+let drag=null;
+cv.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag[0],dy=e.clientY-drag[1];drag=[e.clientX,e.clientY];
+  if(pov){lookY=clamp(lookY-dx*.3,-80,80);lookP=clamp(lookP+dy*.006,-.3,1.2);return}
+  yaw+=dx*.01;pitch=clamp(pitch+dy*.008,.02,1.45);document.querySelectorAll('.views button').forEach(x=>x.setAttribute('aria-pressed',false))});
+cv.addEventListener('pointerup',()=>drag=null);cv.addEventListener('pointercancel',()=>drag=null);
+const step=d=>{setPlay(false);if(motion){mt=clamp(mt+d/motion.fps,0,mdur);return}t=NL?(Math.round(t)+d+N+1)%(N+1):(Math.round(t)+d+N)%N;lastFloor=Math.floor(t)};
+const setBpm=v=>{bpm=clamp(v,40,130);$('bpm').value=bpm;showBpm()};
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey||e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||$('help').open)return;const k=e.key;
+  if(e.code==='Space'){if(e.target.tagName==='BUTTON')return;e.preventDefault();setPlay(!playing)}
+  else if(k==='ArrowRight'){e.preventDefault();step(1)}else if(k==='ArrowLeft'){e.preventDefault();step(-1)}
+  else if(motion)return;
+  else if(k==='ArrowUp'){e.preventDefault();setBpm(bpm+4)}else if(k==='ArrowDown'){e.preventDefault();setBpm(bpm-4)}
+  else if(k>='1'&&k<='4')document.querySelectorAll('.views button')[+k-1].click();
+  else if(k==='m'||k==='M')setBad(!bad);else if(k==='g'||k==='G')$('gd').click();
+});
+cv.addEventListener('wheel',e=>{e.preventDefault();zoom=clamp(zoom*(e.deltaY<0?1.08:.93),.6,2)},{passive:false});
+window.addEventListener('resize',()=>{size();const bt=$('beats');if(bt.children.length)bt.style.gridTemplateColumns='repeat('+(N>16&&window.innerWidth>=700?16:8)+',1fr)'});
+new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+window.__seek=x=>{t=x;lastFloor=Math.floor(t)};
+readColors();size();setPlay(false);selectMove(0);requestAnimationFrame(loop);
+if(window.ResizeObserver)new ResizeObserver(()=>{const w=$('stage').getBoundingClientRect().width;if(Math.abs(w-W)>1)size()}).observe($('stage'));
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bachata practice room</title>
+<script>try{var th=localStorage.getItem('bpr-theme');if(th!=='light'&&th!=='dark')th=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',th)}catch(e){document.documentElement.setAttribute('data-theme','light')}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5" r="2"/><circle cx="16.5" cy="6" r="2"/><path d="M8 8v6l-2 6M8 14l3 6M8 9.5l4.5 1.5 4-1M16.5 9v5l-2 6M16.5 14l2.5 6"/></svg></div>
+    <div><b>Bachata practice room</b><span>Partner moves from the leader’s side, count by count</span></div>
+  </div>
+  <div class="topActions">
+    <button class="ghost" id="helpBtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/></svg><span class="lb">How it works</span></button>
+    <button class="ghost sq" id="themeBtn" aria-label="Switch between light and dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.500 10.500z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.900l1.400 1.400M17.700 17.700l1.400 1.400M4.900 19.100l1.400-1.400M17.700 6.300l1.400-1.400"/></svg></button>
+  </div>
+</header>
+<div class="app">
+  <nav class="lib card" aria-label="Moves">
+    <div class="chips" id="chips" role="group" aria-label="Choose a move"></div>
+  </nav>
+  <main class="work">
+    <div class="titleRow">
+      <div>
+        <p class="eyebrow" id="eyebrow"></p>
+        <h1 id="mname"></h1>
+        <p class="about" id="about"></p>
+      </div>
+      <div class="seg mode simonly" role="group" aria-label="Version">
+        <button id="mGood" aria-pressed="true">Good version</button>
+        <button id="mBad" class="badm" aria-pressed="false">Common mistake</button>
+      </div>
+    </div>
+    <div class="stage" id="stage">
+      <canvas id="floor" aria-hidden="true"></canvas>
+      <canvas id="gl" aria-label="Animated figures showing the selected move"></canvas>
+      <canvas id="over"></canvas>
+      <p class="baking" id="baking" hidden>Smoothing the motion…</p>
+      <div class="count" id="count">1<small>of 8</small></div>
+      <div class="views simonly" role="group" aria-label="Camera">
+        <button data-v="side" aria-pressed="true">Side</button>
+        <button data-v="you" aria-pressed="false">Behind</button>
+        <button data-v="top" aria-pressed="false">Top</button>
+        <button data-v="pov" aria-pressed="false">POV</button>
+      </div>
+      <p class="hint" id="hint">Drag to rotate · scroll to zoom</p>
+      <div class="zoom" role="group" aria-label="Zoom">
+        <button id="zin" aria-label="Zoom in">+</button>
+        <button id="zout" aria-label="Zoom out">−</button>
+      </div>
+    </div>
+    <div class="transport card">
+      <div class="trow">
+        <div class="pbtns">
+          <button class="btn" id="prev" aria-label="Previous count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.500 6l-6 6 6 6"/></svg></button>
+          <button class="btn primary" id="play" aria-label="Play"><span class="ic"></span><span class="lb">Play</span></button>
+          <button class="btn" id="next" aria-label="Next count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.500 6l6 6-6 6"/></svg></button>
+        </div>
+        <div class="beats simonly" id="beats" role="group" aria-label="Counts"></div>
+      </div>
+      <div class="trow">
+        <div class="tempo simonly">
+          <label for="bpm">Tempo</label>
+          <input type="range" id="bpm" min="40" max="130" step="2" value="60">
+          <output id="bpmo" for="bpm">60 BPM</output>
+        </div>
+        <div class="presets simonly" role="group" aria-label="Tempo presets">
+          <button class="btn sm" data-bpm="60" aria-pressed="true">Slow</button>
+          <button class="btn sm" data-bpm="90" aria-pressed="false">Medium</button>
+          <button class="btn sm" data-bpm="120" aria-pressed="false">Song</button>
+        </div>
+        <div class="toggles">
+          <button class="btn tog" id="snd" aria-pressed="true" title="Metronome click on every count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.500v5h3.500l4.500 4v-13l-4.500 4zM16 9a4 4 0 0 1 0 6M18.500 6.500a7.500 7.500 0 0 1 0 11"/></svg><span class="lb">Click</span></button>
+          <button class="btn tog simonly" id="gd" aria-pressed="true" title="Arrows, footprints and turn arcs on the stage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.500 12s3.500-6.500 9.500-6.500 9.500 6.500 9.500 6.500-3.500 6.500-9.500 6.500S2.500 12 2.500 12z"/><circle cx="12" cy="12" r="2.800"/></svg><span class="lb">Guides</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="mbar card" id="mbar" hidden>
+      <input type="range" id="mscrub" min="0" max="1" step="0.001" value="0" aria-label="Position in the clip">
+      <div class="mrow">
+        <label>Speed <select id="mrate"><option value="0.25">0.25×</option><option value="0.5" selected>0.5×</option><option value="0.75">0.75×</option><option value="1">1×</option></select></label>
+        <button class="btn sm" id="mmir" aria-pressed="false">Mirror</button>
+        <button class="btn sm" id="mswap">Swap colors</button>
+      </div>
+      <div class="mrow">
+        <button class="btn sm" id="mtap">Tap the beat</button>
+        <button class="btn sm" id="mone">This is count 1</button>
+        <span class="minfo" id="mbpm">No beat set yet</span>
+      </div>
+      <div class="mrow">
+        <button class="btn sm" id="mA">Loop from here</button>
+        <button class="btn sm" id="mB">Loop to here</button>
+        <button class="btn sm" id="mclr">Clear loop</button>
+        <span class="minfo" id="mloop"></span>
+      </div>
+    </div>
+  </main>
+  <aside class="side" aria-label="Coaching">
+    <section class="card cueCard" id="cueCard" aria-live="polite">
+      <p class="eyebrow" id="cueEyebrow">Count 1</p>
+      <p class="cue" id="cue"></p>
+      <p class="fix" id="fix" hidden></p>
+      <p class="nextCue" id="nextCue"></p>
+    </section>
+    <section class="card details">
+      <h2><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></i><span id="dtitle">Do this</span></h2>
+      <ul id="dlist"></ul>
+      <h2 class="err"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6.500 6.500l11 11M17.500 6.500l-11 11"/></svg></i><span id="etitle">Common mistakes</span></h2>
+      <ul id="elist"></ul>
+      <p class="note simonly">Start slow, around 60 BPM. Real songs run about 120 to 130. This is a simplified guide: directions and hand holds vary between teachers, so check the details with yours.</p>
+    </section>
+    <details class="card legend simonly">
+      <summary>What you see on the stage</summary>
+      <dl>
+        <dt><span class="sw" id="youDot" style="background:var(--lead)"></span></dt><dd><b>You</b>, the leader</dd>
+        <dt><span class="sw" style="background:var(--fol)"></span></dt><dd><b>Her</b>, the follower</dd>
+        <dt><span class="sw ring"></span></dt><dd><b>Gold ring:</b> joined hands</dd>
+        <dt><span class="sw arrow"></span></dt><dd><b>Gold arrow:</b> where your left hand goes next</dd>
+        <dt><span class="sw shadow"></span></dt><dd><b>Shadow:</b> the foot carrying the weight</dd>
+        <dt><span class="sw foot"></span></dt><dd><b>Outlined foot with L or R:</b> your next step</dd>
+        <dt><span class="sw foot dash"></span></dt><dd><b>Dashed foot:</b> a tap, no weight</dd>
+        <dt><span class="sw arc"></span></dt><dd><b>Floor arc:</b> who turns, and which way</dd>
+      </dl>
+    </details>
+  </aside>
+</div>
+<dialog id="help" aria-labelledby="helpTitle">
+  <div class="dlg">
+    <div class="dlgTop"><h2 id="helpTitle">How it works</h2><button class="ghost sq" id="helpClose" aria-label="Close">✕</button></div>
+    <p>Two figures dance each move slowly, one count at a time. You are the green one.</p>
+    <h3>Practice a move</h3>
+    <ol>
+      <li>Pick a move from the list. Start with the basics.</li>
+      <li>Step through the counts with the arrows and read the cue for each one.</li>
+      <li>Press Play at a slow tempo and dance along. Speed up when it feels easy.</li>
+      <li>Switch to “Common mistake” to see what to avoid, and to POV to see it through your own eyes.</li>
+    </ol>
+    <h3>Keyboard</h3>
+    <div class="keysGrid">
+      <span><kbd>Space</kbd></span><span>Play or pause</span>
+      <span><kbd>←</kbd> <kbd>→</kbd></span><span>One count back or forward</span>
+      <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>Faster or slower</span>
+      <span><kbd>1</kbd> to <kbd>4</kbd></span><span>Camera: side, behind, top, POV</span>
+      <span><kbd>M</kbd></span><span>Good version or common mistake</span>
+      <span><kbd>G</kbd></span><span>Guides on or off</span>
+    </div>
+    <h3>Good to know</h3>
+    <p>Drag the stage to rotate the view, or to look around in POV. Moves marked “course” follow one video course and can differ from what your teacher shows. When in doubt, your teacher is right.</p>
+  </div>
+</dialog>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

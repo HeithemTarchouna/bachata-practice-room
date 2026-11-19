@@ -1,0 +1,358 @@
+{
+ "Side basic": {
+  "collisions": {},
+  "mistakeCollisions": {},
+  "jumps": {},
+  "sliding": {
+   "l": 0,
+   "f": 0
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.263
+  }
+ },
+ "Basic in place": {
+  "collisions": {},
+  "jumps": {},
+  "sliding": {
+   "l": 0,
+   "f": 0
+  },
+  "reach": {
+   "l": 0.181,
+   "f": 0.181
+  }
+ },
+ "Forward & back": {
+  "collisions": {},
+  "jumps": {},
+  "sliding": {
+   "l": 0,
+   "f": 0
+  },
+  "reach": {
+   "l": 0.291,
+   "f": 0.291
+  }
+ },
+ "Inside turn": {
+  "collisions": {
+   "SELF f upper/head": 0.043,
+   "SELF f fore/head": 0.013
+  },
+  "mistakeCollisions": {},
+  "jumps": {},
+  "sliding": {
+   "l": 0,
+   "f": 0.045
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.263
+  }
+ },
+ "Outside turn": {
+  "collisions": {},
+  "mistakeCollisions": {
+   "SELF f upper/head": 0.006,
+   "SELF l upper/head": 0.021,
+   "IN f R upper arm in l head": 0.022,
+   "IN f R forearm in l head": 0.021,
+   "head/upper": 0.022,
+   "head/fore": 0.021
+  },
+  "jumps": {},
+  "sliding": {
+   "l": 0,
+   "f": 0.045
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.263
+  }
+ },
+ "Your turn": {
+  "collisions": {
+   "SELF l upper/head": 0.06,
+   "SELF l fore/head": 0.05
+  },
+  "mistakeCollisions": {
+   "SELF l upper/head": 0.009
+  },
+  "jumps": {
+   "l L elbow": 4.9
+  },
+  "sliding": {
+   "l": 0.043,
+   "f": 0
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.263
+  }
+ },
+ "Place swap": {
+  "collisions": {
+   "LEGS l shin/shin": 0.021,
+   "LEGS l shin/thigh": 0.015,
+   "LEGS l thigh/shin": 0.012
+  },
+  "mistakeCollisions": {},
+  "jumps": {},
+  "sliding": {
+   "l": 0.001,
+   "f": 0.002
+  },
+  "reach": {
+   "l": 0.264,
+   "f": 0.237
+  }
+ },
+ "Wrap": {
+  "collisions": {
+   "SELF l upper/head": 0.056,
+   "thigh/skirt": 0.03,
+   "SELF l fore/head": 0.029
+  },
+  "mistakeCollisions": {
+   "IN l L forearm in f head": 0.028,
+   "fore/head": 0.028,
+   "SELF f hand/head": 0.007,
+   "IN l L forearm in f neck": 0.043,
+   "fore/neck": 0.043,
+   "IN l L forearm in f body": 0.023,
+   "thigh/skirt": 0.03,
+   "SELF l upper/head": 0.056,
+   "SELF l fore/head": 0.029
+  },
+  "jumps": {},
+  "sliding": {
+   "l": 0.002,
+   "f": 0.022
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.291
+  }
+ },
+ "Hammerlock": {
+  "collisions": {
+   "LEGS f thigh/shin": 0.037,
+   "LEGS f shin/thigh": 0.034,
+   "LEGS f shin/shin": 0.037,
+   "SELF f upper/head": 0.059,
+   "SELF f fore/head": 0.028
+  },
+  "mistakeCollisions": {
+   "IN l R forearm in f body": 0.017,
+   "LEGS f thigh/shin": 0.037,
+   "LEGS f shin/thigh": 0.034,
+   "LEGS f shin/shin": 0.037,
+   "SELF f upper/head": 0.059,
+   "SELF f fore/head": 0.028
+  },
+  "jumps": {
+   "f R foot": 4.7
+  },
+  "sliding": {
+   "l": 0,
+   "f": 0.036
+  },
+  "reach": {
+   "l": 0.264,
+   "f": 0.303
+  }
+ },
+ "Cross-body lead (course)": {
+  "collisions": {
+   "LEGS l shin/shin": 0.032,
+   "LEGS f thigh/shin": 0.019,
+   "LEGS f shin/thigh": 0.012,
+   "LEGS f shin/shin": 0.016,
+   "LEGS l thigh/shin": 0.017
+  },
+  "jumps": {},
+  "sliding": {
+   "l": 0.002,
+   "f": 0.002
+  },
+  "reach": {
+   "l": 0.249,
+   "f": 0.245
+  }
+ },
+ "Left turn with prep (course)": {
+  "collisions": {
+   "SELF f upper/head": 0.042,
+   "SELF f fore/head": 0.011
+  },
+  "jumps": {},
+  "sliding": {
+   "l": 0,
+   "f": 0.045
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.263
+  }
+ },
+ "Your turn into hammerlock (course)": {
+  "collisions": {
+   "thigh/skirt": 0.034,
+   "shin/skirt": 0.032
+  },
+  "jumps": {},
+  "sliding": {
+   "l": 0.002,
+   "f": 0.002
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.329
+  }
+ },
+ "Hammerlock exit (course)": {
+  "collisions": {
+   "IN f R upper arm in l body": 0.087,
+   "IN f R forearm in l body": 0.086,
+   "torso/upper": 0.045
+  },
+  "jumps": {},
+  "sliding": {
+   "l": 0.017,
+   "f": 0.002
+  },
+  "reach": {
+   "l": 0.181,
+   "f": 0.276
+  }
+ },
+ "Her loop and turn (course)": {
+  "collisions": {
+   "IN l R forearm in f body": 0.073,
+   "IN l R hand in f body": 0.077
+  },
+  "jumps": {
+   "f L elbow": 5.2
+  },
+  "sliding": {
+   "l": 0.002,
+   "f": 0.025
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.202
+  }
+ },
+ "Your loop to closed hold (course)": {
+  "collisions": {
+   "SELF f upper/head": 0.012,
+   "LEGS f thigh/shin": 0.015,
+   "LEGS f shin/shin": 0.013,
+   "thigh/thigh": 0.023,
+   "thigh/skirt": 0.02,
+   "LEGS l shin/shin": 0.021
+  },
+  "jumps": {},
+  "sliding": {
+   "l": 0.002,
+   "f": 0.01
+  },
+  "reach": {
+   "l": 0.309,
+   "f": 0.291
+  }
+ },
+ "Combo 1: Turns": {
+  "collisions": {
+   "SELF f upper/head": 0.043,
+   "SELF f fore/head": 0.013
+  },
+  "jumps": {},
+  "sliding": {
+   "l": 0,
+   "f": 0.045
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.263
+  }
+ },
+ "Combo 2: Wrap": {
+  "collisions": {
+   "SELF l upper/head": 0.056,
+   "thigh/skirt": 0.03,
+   "SELF l fore/head": 0.029,
+   "SELF f upper/head": 0.043,
+   "SELF f fore/head": 0.013
+  },
+  "jumps": {},
+  "sliding": {
+   "l": 0.002,
+   "f": 0.045
+  },
+  "reach": {
+   "l": 0.263,
+   "f": 0.291
+  }
+ },
+ "Combo 3: Full dance": {
+  "collisions": {
+   "SELF f upper/head": 0.059,
+   "SELF f fore/head": 0.028,
+   "LEGS f thigh/shin": 0.037,
+   "LEGS f shin/thigh": 0.034,
+   "LEGS f shin/shin": 0.037,
+   "SELF l upper/head": 0.06,
+   "SELF l fore/head": 0.05,
+   "LEGS l shin/shin": 0.021,
+   "LEGS l shin/thigh": 0.015,
+   "LEGS l thigh/shin": 0.012,
+   "thigh/skirt": 0.03
+  },
+  "jumps": {
+   "f R foot": 4.7,
+   "l L elbow": 4.9
+  },
+  "sliding": {
+   "l": 0.043,
+   "f": 0.045
+  },
+  "reach": {
+   "l": 0.271,
+   "f": 0.303
+  }
+ },
+ "Course combination": {
+  "collisions": {
+   "LEGS l thigh/shin": 0.038,
+   "LEGS l shin/shin": 0.053,
+   "LEGS l shin/thigh": 0.032,
+   "LEGS f thigh/shin": 0.019,
+   "LEGS f shin/thigh": 0.012,
+   "LEGS f shin/shin": 0.016,
+   "SELF f upper/head": 0.042,
+   "SELF f fore/head": 0.011,
+   "thigh/skirt": 0.034,
+   "shin/skirt": 0.032,
+   "IN f R upper arm in l body": 0.089,
+   "IN f R forearm in l body": 0.088,
+   "torso/upper": 0.046,
+   "IN l R forearm in f body": 0.073,
+   "IN l R hand in f body": 0.077,
+   "thigh/thigh": 0.023
+  },
+  "jumps": {
+   "f L elbow": 5.2
+  },
+  "sliding": {
+   "l": 0.017,
+   "f": 0.045
+  },
+  "reach": {
+   "l": 0.332,
+   "f": 0.329
+  }
+ }
+}
