@@ -5,6 +5,21 @@ import { moves } from "../engine";
 import { Stage } from "../render/stage";
 import type { ViewName } from "../render/camera";
 import { RealMotion } from "./motion";
+import {
+  applyStatic,
+  captureStatic,
+  getLang,
+  getRole,
+  initialLang,
+  initialRole,
+  setLang,
+  setRole,
+  tf,
+  tr,
+  type Lang,
+  type Role,
+} from "../i18n";
+import { followerNotes } from "../i18n/follower";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const HINT = "Drag to rotate · scroll to zoom";
@@ -13,7 +28,7 @@ const ICON = {
   pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>',
 };
 const UPLOAD =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 19h14"/></svg><span>Load motion file</span>';
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 19h14"/></svg><span></span>';
 
 export class App {
   private stage = new Stage($<HTMLCanvasElement>("floor"), $<HTMLCanvasElement>("gl"), $<HTMLCanvasElement>("over"));
@@ -32,8 +47,17 @@ export class App {
   private lastBeat = 0;
   private shownCount = -1;
   private lastFrame = performance.now();
+  private motionName = "";
 
   constructor() {
+    captureStatic();
+    setLang(initialLang(), false);
+    setRole(initialRole(), false);
+    applyStatic();
+    $<HTMLSelectElement>("lang").value = getLang();
+    $<HTMLSelectElement>("role").value = getRole();
+    this.stage.camera.who = getRole();
+    this.stage.camera.setView("side");
     this.readColors();
     this.buildMoveList();
     this.bindControls();
@@ -53,6 +77,8 @@ export class App {
   get state() {
     return {
       move: this.move,
+      lang: getLang(),
+      role: getRole(),
       mistake: this.mistake,
       t: this.t,
       playing: this.playing,
@@ -77,6 +103,34 @@ export class App {
   get camera() {
     return this.stage.camera;
   }
+  /** Switch language and rewrite every text on the page. Nothing else changes: same move, same count. */
+  setLanguage(lang: Lang) {
+    setLang(lang);
+    $<HTMLSelectElement>("lang").value = lang;
+    this.rewrite();
+  }
+  /** Switch between the leader's and the follower's side: wording, guides, camera presets and POV. */
+  setRole(role: Role) {
+    setRole(role);
+    $<HTMLSelectElement>("role").value = role;
+    const cam = this.stage.camera;
+    cam.who = role;
+    if (cam.view !== "free") cam.setView(cam.view);
+    this.rewrite();
+  }
+  private rewrite() {
+    applyStatic();
+    $("chips").replaceChildren();
+    this.chips = [];
+    this.buildMoveList();
+    this.setPlaying(this.playing);
+    this.markMistake();
+    if (this.motion.active) this.showMotionText();
+    else {
+      this.showMove();
+      this.showCount(true);
+    }
+  }
 
   // ---------------------------------------------------------------- setup
   private readColors() {
@@ -92,19 +146,21 @@ export class App {
       const group = engine.groupOf(i);
       if (group !== lastGroup) {
         lastGroup = group;
-        list.appendChild(Object.assign(document.createElement("span"), { className: "chipsep", textContent: group }));
+        list.appendChild(
+          Object.assign(document.createElement("span"), { className: "chipsep", textContent: tr(group) }),
+        );
       }
       const b = document.createElement("button"),
         name = document.createElement("span"),
         count = document.createElement("span");
       b.className = "chip";
       name.className = "nm";
-      name.textContent = engine.shortName(i);
+      name.textContent = tr(engine.shortName(i));
       count.className = "ct";
       count.textContent = String(m.keys.length);
-      count.title = m.keys.length + " counts";
+      count.title = tf("{n} counts", { n: m.keys.length });
       b.append(name, count);
-      b.setAttribute("aria-label", `${engine.shortName(i)}, ${m.keys.length} counts`);
+      b.setAttribute("aria-label", tr(engine.shortName(i)) + ", " + tf("{n} counts", { n: m.keys.length }));
       b.onclick = () => {
         this.select(i);
         if (window.innerWidth < 1280) b.scrollIntoView({ block: "nearest", inline: "center" });
@@ -113,15 +169,16 @@ export class App {
       this.chips.push(b);
     });
     list.appendChild(
-      Object.assign(document.createElement("span"), { className: "chipsep", textContent: "Real motion" }),
+      Object.assign(document.createElement("span"), { className: "chipsep", textContent: tr("Real motion") }),
     );
     const label = document.createElement("label"),
       input = document.createElement("input");
     label.className = "chip file";
     label.innerHTML = UPLOAD;
+    label.querySelector("span")!.textContent = tr("Load motion file");
     input.type = "file";
     input.accept = ".json,application/json";
-    input.setAttribute("aria-label", "Load a motion file made with extract_poses.py");
+    input.setAttribute("aria-label", tr("Load a motion file made with extract_poses.py"));
     label.appendChild(input);
     list.appendChild(label);
     input.onchange = () => {
@@ -131,8 +188,9 @@ export class App {
         try {
           this.openMotion(JSON.parse(text), file.name);
         } catch {
-          $("cue").textContent =
-            "That file doesn’t look like a motion file. Make it with extract_poses.py and load the .poses.json it saves.";
+          $("cue").textContent = tr(
+            "That file doesn’t look like a motion file. Make it with extract_poses.py and load the .poses.json it saves.",
+          );
         }
         input.value = "";
       });
@@ -163,6 +221,8 @@ export class App {
     document
       .querySelectorAll<HTMLElement>(".views button")
       .forEach((b) => (b.onclick = () => this.setView(b.dataset.v as ViewName)));
+    $<HTMLSelectElement>("lang").onchange = (e) => this.setLanguage((e.target as HTMLSelectElement).value as Lang);
+    $<HTMLSelectElement>("role").onchange = (e) => this.setRole((e.target as HTMLSelectElement).value as Role);
     $("themeBtn").onclick = () => {
       const root = document.documentElement,
         next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
@@ -247,7 +307,7 @@ export class App {
     const showLoop = () =>
       ($("mloop").textContent =
         mo.loopFrom != null || mo.loopTo != null
-          ? `Loop ${clock(mo.loopFrom ?? 0)} → ${clock(mo.loopTo ?? mo.duration)}`
+          ? tf("Loop {a} → {b}", { a: clock(mo.loopFrom ?? 0), b: clock(mo.loopTo ?? mo.duration) })
           : "");
     $("mA").onclick = () => {
       mo.loopFrom = mo.t;
@@ -277,10 +337,18 @@ export class App {
     this.lastBeat = 0;
     engine.load(index, this.mistake, false);
     this.markMistake();
-    const N = engine.counts(),
+    this.showMove();
+    this.showCount(true);
+  }
+
+  /** Everything on the page that describes the current move, in the current language. */
+  private showMove() {
+    const index = this.move,
+      m = moves[index],
+      N = engine.counts(),
       mBad = $<HTMLButtonElement>("mBad");
     mBad.disabled = !m.mistake;
-    mBad.title = m.mistake ? "" : "No mistake version for this one";
+    mBad.title = m.mistake ? "" : tr("No mistake version for this one");
     this.chips.forEach((b, j) => b.setAttribute("aria-pressed", String(j === index)));
 
     const beats = $("beats");
@@ -291,23 +359,23 @@ export class App {
       const b = document.createElement("button"),
         key = m.keys[c - 1];
       b.className = "beat" + (c % 4 === 0 ? " tapc" : "") + (m.combo && key.segStart ? " seg0" : "");
-      b.textContent = c % 4 === 0 ? "tap" : String(N > 16 ? ((c - 1) % 8) + 1 : c);
-      b.setAttribute("aria-label", `Go to count ${c}` + (m.combo ? ` (${key.seg})` : ""));
-      if (m.combo) b.title = key.seg ?? "";
+      b.textContent = c % 4 === 0 ? tr("tap") : String(N > 16 ? ((c - 1) % 8) + 1 : c);
+      b.setAttribute("aria-label", tf("Go to count {c}", { c }) + (m.combo ? ` (${tr(key.seg ?? "")})` : ""));
+      if (m.combo) b.title = tr(key.seg ?? "");
       b.onclick = () => {
         this.seek(engine.noLoop() ? c : c % N);
         this.setPlaying(false);
       };
       beats.appendChild(b);
     }
-    $("mname").textContent = engine.shortName(index);
-    $("eyebrow").textContent = `${engine.groupOf(index)} · ${N} counts`;
-    $("about").textContent = m.about;
-    $("dtitle").textContent = "Do this";
-    $("etitle").textContent = "Common mistakes";
-    fillList($("dlist"), m.tips);
-    fillList($("elist"), m.errors);
-    this.showCount(true);
+    $("mname").textContent = tr(engine.shortName(index));
+    $("eyebrow").textContent = tr(engine.groupOf(index)) + " · " + tf("{n} counts", { n: N });
+    $("about").textContent = tr(m.about);
+    $("dtitle").textContent = tr("Do this");
+    $("etitle").textContent = tr("Common mistakes");
+    const hers = getRole() === "f" ? followerNotes[m.name] : null;
+    fillList($("dlist"), hers?.tips ?? m.tips);
+    fillList($("elist"), hers?.errors ?? m.errors);
   }
 
   setMistake(on: boolean) {
@@ -324,15 +392,15 @@ export class App {
     $("stage").classList.toggle("bad", b);
     $("cueCard").classList.toggle("bad", b);
     $("youDot").style.background = b ? "var(--bad)" : "var(--lead)";
-    $("hint").textContent = b ? "Showing the common mistake" : HINT;
+    $("hint").textContent = this.motion.active ? "" : tr(b ? "Showing the common mistake" : HINT);
   }
 
   setPlaying(on: boolean) {
     this.playing = on;
     const b = $("play");
     b.querySelector(".ic")!.innerHTML = on ? ICON.pause : ICON.play;
-    b.querySelector(".lb")!.textContent = on ? "Pause" : "Play";
-    b.setAttribute("aria-label", on ? "Pause" : "Play");
+    b.querySelector(".lb")!.textContent = tr(on ? "Pause" : "Play");
+    b.setAttribute("aria-label", tr(on ? "Pause" : "Play"));
     if (on) {
       try {
         this.audio ??= new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -374,32 +442,38 @@ export class App {
   // ---------------------------------------------------------------- real motion
   private openMotion(obj: any, name: string) {
     this.motion.load(obj);
+    this.motionName = name;
     this.setPlaying(false);
     this.mistake = false;
     this.markMistake();
     document.body.classList.add("motion");
     $("mbar").hidden = false;
-    this.chips.forEach((b) => b.setAttribute("aria-pressed", "false"));
-    $("mbpm").textContent = "No beat set yet";
+    $("mbpm").textContent = tr("No beat set yet");
     $("mloop").textContent = "";
-    $("mname").textContent = "Real motion";
-    $("eyebrow").textContent = "From your video";
-    $("about").textContent =
-      `Real motion from ${this.motion.data.source || name} (${clock(this.motion.duration)}). These are the actual dancers from the video, traced as stick figures.`;
-    $("cueEyebrow").textContent = "Getting started";
-    $("cue").textContent = "Play it slowly. Tap the beat, then mark count 1 to see the counts.";
+    this.showMotionText();
+  }
+  private showMotionText() {
+    this.chips.forEach((b) => b.setAttribute("aria-pressed", "false"));
+    $("mname").textContent = tr("Real motion");
+    $("eyebrow").textContent = tr("From your video");
+    $("about").textContent = tf(
+      "Real motion from {source} ({length}). These are the actual dancers from the video, traced as stick figures.",
+      { source: this.motion.data.source || this.motionName, length: clock(this.motion.duration) },
+    );
+    $("cueEyebrow").textContent = tr("Getting started");
+    $("cue").textContent = tr("Play it slowly. Tap the beat, then mark count 1 to see the counts.");
     $("cue").classList.remove("bad");
     $("fix").hidden = true;
     $("nextCue").hidden = true;
     $("hint").textContent = "";
-    $("dtitle").textContent = "How to use real motion";
+    $("dtitle").textContent = tr("How to use real motion");
     fillList($("dlist"), [
       "Play at 0.5× and tap “Tap the beat” on every step for a few counts. Then pause on a count 1 and press “This is count 1.”",
       "Use “Loop from here” and “Loop to here” to repeat a single move.",
       "“Mirror” flips left and right, so you can follow along as if in a mirror.",
       "If the colors are the wrong way round (you should be green), press “Swap colors.”",
     ]);
-    $("etitle").textContent = "Good to know";
+    $("etitle").textContent = tr("Good to know");
     fillList($("elist"), [
       "This is a flat view from the camera, not 3D: you can’t rotate it.",
       "When the dancers overlap or turn, some joints get lost for a moment. That’s the tracking, not the dancing.",
@@ -410,7 +484,7 @@ export class App {
     this.motion.close();
     document.body.classList.remove("motion");
     $("mbar").hidden = true;
-    $("hint").textContent = HINT;
+    $("hint").textContent = tr(HINT);
     this.setPlaying(false);
   }
 
@@ -475,7 +549,7 @@ export class App {
       const frame = engine.frame({ lead, follow: this.colors.fol, skin: this.colors.skin, hair: this.colors.hair });
       this.stage.draw(
         frame,
-        { on: this.guides, lead },
+        { on: this.guides, lead, who: getRole() },
         { floor: this.colors.floor, lead, follow: this.colors.fol, join: this.colors.join, bg: this.colors.bg },
       );
       this.showCount(false);
@@ -499,33 +573,37 @@ export class App {
     big.firstChild!.nodeValue = String(c);
     big.classList.toggle("tap", tap);
     big.querySelector("small")!.textContent = atStart
-      ? "start"
+      ? tr("start")
       : m.combo
-        ? key.seg + (tap ? " · tap" : "")
+        ? tr(key.seg ?? "") + (tap ? " · " + tr("tap") : "")
         : tap
-          ? "tap"
-          : "of " + N;
+          ? tr("tap")
+          : tf("of {n}", { n: N });
     const bad = this.mistake && m.mistake;
     $("cueEyebrow").textContent = atStart
-      ? "Starting position"
-      : (bad ? "Common mistake · count " : "Count ") + c + (tap ? " · tap" : "") + (m.combo ? " · " + key.seg : "");
+      ? tr("Starting position")
+      : tf(bad ? "Common mistake · count {c}" : "Count {c}", { c }) +
+        (tap ? " · " + tr("tap") : "") +
+        (m.combo ? " · " + tr(key.seg ?? "") : "");
     const cue = $("cue"),
       fix = $("fix"),
       nx = $("nextCue");
     cue.classList.toggle("bad", !!bad);
     if (bad) {
-      cue.textContent = m.mistake!.what;
-      fix.replaceChildren(Object.assign(document.createElement("b"), { textContent: "Fix: " }), m.mistake!.fix);
+      cue.textContent = tr(m.mistake!.what);
+      fix.replaceChildren(Object.assign(document.createElement("b"), { textContent: tr("Fix: ") }), tr(m.mistake!.fix));
       fix.hidden = false;
       nx.hidden = true;
     } else {
-      cue.textContent = key.cue;
+      cue.textContent = tr(key.cue);
       fix.hidden = true;
       nx.hidden = false;
       const lastOfSet = noLoop && c === N;
       nx.replaceChildren(
-        Object.assign(document.createElement("b"), { textContent: lastOfSet ? "Then: " : `Next, count ${next}: ` }),
-        lastOfSet ? "it starts again from the starting position." : m.keys[next - 1].cue,
+        Object.assign(document.createElement("b"), {
+          textContent: lastOfSet ? tr("Then: ") : tf("Next, count {n}: ", { n: next }),
+        }),
+        lastOfSet ? tr("it starts again from the starting position.") : tr(m.keys[next - 1].cue),
       );
     }
     [...$("beats").children].forEach((b, i) => {
@@ -540,7 +618,7 @@ export class App {
       big = $("count");
     big.firstChild!.nodeValue = c ? String(c) : "·";
     big.classList.toggle("tap", tap);
-    big.querySelector("small")!.textContent = clock(this.motion.t) + (tap ? " · tap" : "");
+    big.querySelector("small")!.textContent = clock(this.motion.t) + (tap ? " · " + tr("tap") : "");
     const scrub = $<HTMLInputElement>("mscrub");
     if (document.activeElement !== scrub)
       scrub.value = String(this.motion.duration ? this.motion.t / this.motion.duration : 0);
@@ -549,7 +627,7 @@ export class App {
 }
 
 function fillList(ul: HTMLElement, lines: string[]) {
-  ul.replaceChildren(...lines.map((text) => Object.assign(document.createElement("li"), { textContent: text })));
+  ul.replaceChildren(...lines.map((text) => Object.assign(document.createElement("li"), { textContent: tr(text) })));
 }
 /** Seconds as m:ss.t */
 function clock(x: number) {

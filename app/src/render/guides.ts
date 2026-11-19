@@ -1,10 +1,12 @@
 // The teaching marks drawn around the dancers: floor grid, weight shadows, the next footprint, turn arcs,
-// the gold arrow for the leader's left hand, rings on joined hands, and the little map in POV.
+// the gold arrow for your leading hand, rings on joined hands, and the little map in POV.
+// "You" is the leader or the follower (GuideInput.who): the footprint, the arrow and the map follow that dancer.
 import { counts, keyStates, noLoop, poseAt, time } from "../engine";
 import type { Frame } from "../engine";
 import { vec } from "../engine/core";
 import type { Camera } from "./camera";
 import type { StageColors } from "./stage";
+import { tr } from "../i18n";
 
 type Ctx = CanvasRenderingContext2D;
 type V = number[];
@@ -13,6 +15,8 @@ export interface GuideInput {
   on: boolean;
   /** Colour used for the leader's marks (red in the "common mistake" version). */
   lead: string;
+  /** Who is using the app: the leader or the follower. */
+  who: "l" | "f";
 }
 
 const FONT = '700 13px "Atkinson Hyperlegible", system-ui, sans-serif';
@@ -124,15 +128,16 @@ export function drawFloor(ctx: Ctx, cam: Camera, frame: Frame, g: GuideInput, co
     }
   }
 
-  // the leader's next step: an outlined footprint with L or R (dashed for a tap, which takes no weight)
+  // your next step: an outlined footprint with L or R (dashed for a tap, which takes no weight)
   const N = counts(),
     k0 = noLoop() ? Math.min(Math.floor(t), N - 1) : Math.floor(t) % N,
-    B = keyStates()[k0 + 1].l;
+    B = keyStates()[k0 + 1][g.who],
+    mine = g.who === "l" ? g.lead : colors.follow;
   const tap = B.tap,
     sd = tap ? (B.wL ? "R" : "L") : B.wL ? "L" : "R",
     f = B[sd],
     bv = vec(B.th),
-    cur = Pl[sd];
+    cur = (g.who === "l" ? Pl : Pf)[sd];
   const print: V[] = [];
   for (let i = 0; i <= 20; i++) {
     const a = (i / 20) * 6.283,
@@ -143,39 +148,39 @@ export function drawFloor(ctx: Ctx, cam: Camera, frame: Frame, g: GuideInput, co
   const pp = path(cam, print);
   if (!pp) return;
   if (!tap) {
-    ctx.fillStyle = g.lead;
+    ctx.fillStyle = mine;
     ctx.globalAlpha = 0.16;
     ctx.beginPath();
     pp.forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])));
     ctx.fill();
     ctx.globalAlpha = 1;
   }
-  stroke(ctx, pp, g.lead, 2.5, tap ? [5, 4] : []);
+  stroke(ctx, pp, mine, 2.5, tap ? [5, 4] : []);
   if (Math.hypot(f[0] - cur[0], f[2] - cur[2]) > 0.07) {
     const way = path(cam, [
       [cur[0], 0.004, cur[2]],
       [f[0], 0.004, f[2]],
     ]);
     if (way) {
-      stroke(ctx, way, g.lead, 2);
-      arrowHead(ctx, way[0], way[1], g.lead, 6);
+      stroke(ctx, way, mine, 2);
+      arrowHead(ctx, way[0], way[1], mine, 6);
     }
   }
   const q = cam.project([f[0] + bv.f[0] * 0.06, 0.004, f[2] + bv.f[1] * 0.06]);
   if (q[2] > 0) {
-    const text = sd + (tap ? " tap" : "");
+    const text = tr(sd) + (tap ? " " + tr("tap") : "");
     ctx.font = FONT;
     const tw = ctx.measureText(text).width + 12,
       x = q[0] - tw / 2,
       y = q[1] + Math.max(14, 0.1 * cam.pixelsPerMeter(q[2]));
     ctx.fillStyle = colors.bg;
-    ctx.strokeStyle = g.lead;
+    ctx.strokeStyle = mine;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.roundRect(x, y, tw, 20, 10);
     ctx.fill();
     ctx.stroke();
-    ctx.fillStyle = g.lead;
+    ctx.fillStyle = mine;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(text, q[0], y + 10.5);
@@ -188,11 +193,14 @@ export function drawOverlay(ctx: Ctx, cam: Camera, frame: Frame, g: GuideInput, 
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
-  // gold arrow: where the leader's left hand travels during this count
+  // gold arrow: where the hand that leads the move travels during this count (his left, which holds her right)
   if (g.on) {
     const t = time(),
       pts: V[] = [];
-    for (let i = 0; i <= 10; i++) pts.push((poseAt(t + i / 10, "l", Pf.c).hands as any).L);
+    for (let i = 0; i <= 10; i++)
+      pts.push(
+        g.who === "l" ? (poseAt(t + i / 10, "l", Pf.c).hands as any).L : (poseAt(t + i / 10, "f", Pl.c).hands as any).R,
+      );
     let len = 0;
     for (let i = 1; i < pts.length; i++)
       len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1], pts[i][2] - pts[i - 1][2]);
@@ -215,7 +223,7 @@ export function drawOverlay(ctx: Ctx, cam: Camera, frame: Frame, g: GuideInput, 
     ctx.stroke();
   }
 
-  // POV: a small map, so you still know where she is when she leaves your view
+  // POV: a small map, so you still know where your partner is when they leave your view
   if (cam.pov) {
     const m = 80,
       x0 = cam.width - m - 12,
@@ -223,7 +231,8 @@ export function drawOverlay(ctx: Ctx, cam: Camera, frame: Frame, g: GuideInput, 
       cx = x0 + m / 2,
       cy = y0 + m / 2 + 8,
       sc = 36,
-      lv = vec(Pl.headTh);
+      me = g.who === "l" ? Pl : Pf,
+      lv = vec(me.headTh);
     ctx.fillStyle = colors.bg;
     ctx.strokeStyle = colors.floor;
     ctx.lineWidth = 1.5;
@@ -232,8 +241,8 @@ export function drawOverlay(ctx: Ctx, cam: Camera, frame: Frame, g: GuideInput, 
     ctx.fill();
     ctx.stroke();
     const at = (p: V) => {
-      const dx = p[0] - Pl.c[0],
-        dz = p[1] - Pl.c[1];
+      const dx = p[0] - me.c[0],
+        dz = p[1] - me.c[1];
       return [cx + (dx * lv.r[0] + dz * lv.r[1]) * sc, cy - (dx * lv.f[0] + dz * lv.f[1]) * sc];
     };
     for (const [P, color] of [

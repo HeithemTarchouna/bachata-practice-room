@@ -257,15 +257,18 @@ export class Figures {
     for (const s of [-1, 1]) this.capsule(fp(0.9, s * 0.2, -0.56), fp(0.95, 0, -0.63), R * 0.035, R * 0.04, lip, true);
   }
 
-  /** Redraw both dancers. In POV the leader's own head and torso are left out: you are looking out of them. */
-  update(shapes: Shape[], pov: boolean) {
+  /**
+   * Redraw both dancers.
+   * @param hide POV only: "l" or "f", the dancer whose head and torso are left out, because you look out of them.
+   */
+  update(shapes: Shape[], hide: "l" | "f" | null) {
     this.balls.begin();
     this.tubePool.begin();
     for (const m of this.surfaces.values()) m.visible = false;
     const skirts = new Map<string, Shape[]>();
     for (const s of shapes) {
       if (s.t === "x" || s.nod || s.bar || s.part === "torso") continue; // collision-only volumes; the torso is drawn as one surface instead
-      if (pov && s.lead && (s.torso || s.t === "h")) continue;
+      if (hide && !!s.lead === (hide === "l") && (s.torso || s.t === "h")) continue;
       if (s.t === "c") this.capsule(s.a as V, s.b as V, s.wa!, s.wb!, s.col!, !!s.flat);
       else if (s.t === "o") this.ball(s.p as V, s.r!, s.col!, !!s.flat);
       else if (s.t === "h") {

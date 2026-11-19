@@ -1,4 +1,4 @@
-// The camera: an orbit view around the couple, or the leader's own eyes (POV).
+// The camera: an orbit view around the couple, or your own eyes (POV). "You" is the leader or the follower.
 import * as THREE from "three";
 
 export type ViewName = "side" | "you" | "top" | "pov" | "free";
@@ -9,6 +9,8 @@ export const VIEWS: Record<string, [number, number]> = { side: [0.62, 0.36], you
 export class Camera {
   readonly three = new THREE.PerspectiveCamera(40, 1, 0.05, 60);
   view: ViewName = "side";
+  /** Whose side the presets and POV are seen from: leader or follower. */
+  who: "l" | "f" = "l";
   yaw = 0.62;
   pitch = 0.36;
   zoom = 1;
@@ -32,7 +34,11 @@ export class Camera {
     if (name === "pov") {
       this.povYaw = 0;
       this.povPitch = 0.4;
-    } else if (VIEWS[name]) [this.yaw, this.pitch] = VIEWS[name];
+    } else if (VIEWS[name]) {
+      [this.yaw, this.pitch] = VIEWS[name];
+      // the follower stands at the other end of the line, so her presets are the mirror image
+      if (this.who === "f") this.yaw = -this.yaw;
+    }
   }
 
   /** Drag on the stage: orbit, or look around in POV. */
@@ -59,7 +65,7 @@ export class Camera {
   /**
    * Place the camera for this frame.
    * @param couple midpoint between the dancers on the floor, [x, z]
-   * @param eye POV only: the leader's eye position, and the direction (degrees) and tilt his head faces
+   * @param eye POV only: your eye position, and the direction (degrees) and tilt your head faces
    */
   update(couple: [number, number], eye?: { at: number[]; yawDeg: number; pitch: number }) {
     const cam = this.three;

@@ -10,16 +10,51 @@ anything.
 ## READ THIS FIRST: version 2 (rebuild started 2026-11-20)
 
 The user asked for a proper rebuild: modules instead of one file, a real 3D
-renderer, and a loop where the AI can verify motion itself. Status: the new
-app runs and passes its tests, but it is NOT yet the default.
+renderer, and a loop where the AI can verify motion itself. Status: done and
+accepted by the user. The new app IS the default.
 
-- `index.html` (root): still the OLD single-file app. Same file as
-  `legacy/index.html`. Old tools are in `legacy/tools/`.
-- `practice-room-v2.html` (root): the NEW app, built from `app/`. It replaces
-  `index.html` only when the user agrees it is at least as good.
+- `index.html` (root): the NEW app, built from `app/` by
+  `node scripts/publish.mjs`. Never edit it by hand.
+- `legacy/index.html` and `legacy/tools/`: the old single-file app.
+- Published: github.com/HeithemTarchouna/bachata-practice-room, served by
+  GitHub Pages from `main` (root). A push to `main` updates the public page.
 - Most of the sections below this one describe the OLD app's history. The
   dance logic was ported unchanged, so the choreography notes still apply.
 
+### Languages (2026-11-19)
+
+English and French, dropdown `#lang` in the top bar, saved in localStorage
+(`bpr-lang`), default from the browser language. English is the source: all
+text stays in English in the code, `app/index.html` and the move library.
+`src/i18n/fr.ts` maps each English text to French; `tr()` / `tf()` in
+`src/i18n/index.ts` look it up. Fixed page texts carry `data-t`; every
+`aria-label` and `title` is translated too. When you add or change ANY visible
+text, add the French entry: `tests/i18n.test.ts` and `tools/test_app.py`
+(which fails on anything left in English) will tell you. The French is the
+AI's translation ("tu" form, dance words like tap, wrap, loop kept); the
+teacher is French and has not proofread it.
+
+### Leader or follower (2026-11-19)
+
+Dropdown `#role` in the top bar, saved in localStorage (`bpr-role`). The
+library and the page stay written for the leader. `src/i18n/follower.ts`
+holds her side: `follower` maps a leader text to her wording (cues,
+descriptions, mistake texts, move names, a few page texts) and
+`followerNotes` gives her own tips and mistakes per move. `tr()` applies her
+wording first, then the language, so every text goes through one door.
+French for her texts is in `fr-follower.ts`. Tests fail when a count of any
+move has no follower wording or no French.
+On the stage: `GuideInput.who` picks whose footprint, hand arrow (his left /
+her right) and POV map are drawn; `Camera.who` mirrors the Side and Behind
+presets and puts POV in her eyes; `Figures.update` hides the head and torso
+of whoever is looking. `tools/views.py ... --follower` gives her six views.
+Limits, tell the user honestly:
+- Her texts are the AI's reading of the choreography. No teacher or follower
+  has checked them.
+- "Common mistake" still plays the LEADER's mistake; her text explains what
+  she feels and what to do. Mistakes followers make themselves are text only.
+- In her POV her own raised arm fills much of the picture while the hand is
+  above her head (turn counts 5 to 6).
 ### Layout of `app/` (TypeScript, Vite, Three.js, Vitest)
 
 - `src/moves/library.ts`: every move as data. `types.ts` describes it.
@@ -44,10 +79,10 @@ app runs and passes its tests, but it is NOT yet the default.
 ### The loop: run all of this before reporting anything
 
 From `app/`:
-1. `npx tsc --noEmit` then `npx vitest run` (113 tests, about 45 s).
-2. `npx vite build; node scripts/publish.mjs` writes `practice-room-v2.html`.
-3. From the project root: `python tools/test_app.py <a .poses.json>` (437
-   interface checks on the built file).
+1. `npx tsc --noEmit` then `npx vitest run` (121 tests, about 90 s).
+2. `npx vite build; node scripts/publish.mjs` writes the root `index.html`.
+3. From the project root: `python tools/test_app.py <a .poses.json>` (475
+   interface checks on the built file: English, French, leader, follower).
 4. LOOK: `python tools/views.py <move> out.png <times...>` gives six cameras
    (side, behind, top, POV, far side, front of her) per moment. Read it.
    `python tools/shot.py out.png 900 1000 <move> <count> pov light stage` for

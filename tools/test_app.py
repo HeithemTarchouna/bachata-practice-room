@@ -103,6 +103,66 @@ async def main():
                 await chips.nth(i).click();await pg.wait_for_timeout(100);sw=await ev('document.documentElement.scrollWidth');ok(f'no sideways scroll at {w}px (move {i})',sw<=w,str(sw))
             s=await pg.locator('#stage').bounding_box();g=await pg.locator('#gl').bounding_box()
             ok(f'stage fits at {w}px',s['width']<=w and s['height']>=300,str(s));ok(f'3D layer fills the stage at {w}px',abs(g['width']-s['width'])<3 and abs(g['height']-s['height'])<3,str(g))
+        # French: everything is translated, nothing else changes
+        await pg.set_viewport_size({'width':1440,'height':900});await chips.nth(3).click();await ev('__app.seek(5)');await pg.wait_for_timeout(200)
+        en_title=await pg.locator('#mname').inner_text();en_cue=await pg.locator('#cue').inner_text()
+        await pg.locator('#lang').select_option('fr');await pg.wait_for_timeout(200)
+        ok('french: switches and is saved',await st('lang')=='fr' and await ev("document.documentElement.lang==='fr'&&localStorage.getItem('bpr-lang')==='fr'"))
+        ok('french: same move and count',await st('move')==3 and await st('t')==5)
+        ok('french: title and cue change',(await pg.locator('#mname').inner_text())!=en_title and (await pg.locator('#cue').inner_text())!=en_cue)
+        ok('french: fixed texts',(await pg.locator('#mGood').inner_text())=='Bonne version' and (await pg.locator('#play .lb').inner_text())=='Lecture' and await pg.locator('#play').get_attribute('aria-label')=='Lecture')
+        chips=pg.locator('.chip:not(.file)');ok('french: list rebuilt',await chips.count()==len(names) and await chips.nth(3).get_attribute('aria-pressed')=='true')
+        for i,nm in enumerate(names):
+            await chips.nth(i).click();N=await st('counts')
+            for c in sorted(set([1,N//2,N])):
+                await pg.locator('#beats .beat').nth(c-1).click()
+                try: await pg.wait_for_function(f"document.getElementById('count').firstChild.nodeValue==='{c}'",timeout=5000)
+                except Exception: pass
+            if await st('noLoop'): await ev('__app.seek(0)');await pg.wait_for_timeout(120)
+            if await ev('!!__engine.moves[__app.state.move].mistake'):
+                await pg.locator('#mBad').click();await pg.wait_for_timeout(100);await pg.locator('#mGood').click()
+        await pg.locator('#helpBtn').click();ok('french: help',(await pg.locator('#helpTitle').inner_text())=='Mode d’emploi');await pg.locator('#helpClose').click()
+        if MOTION:
+            await pg.locator('.chip.file input').set_input_files(MOTION);await pg.wait_for_timeout(600)
+            ok('french: real motion',(await pg.locator('#mname').inner_text())=='Mouvement réel')
+            for _ in range(4):
+                await pg.locator('#mtap').click();await pg.locator('#next').click();await pg.locator('#next').click();await pg.locator('#next').click()
+            await pg.locator('#mone').click();await pg.locator('#mA').click()
+            await pg.locator('#lang').select_option('en');ok('language switch inside real motion',await st('realMotion') and (await pg.locator('#mname').inner_text())=='Real motion');await pg.locator('#lang').select_option('fr')
+            await chips.nth(0).click();await pg.wait_for_timeout(150)
+        for w in [360,1440]:
+            await pg.set_viewport_size({'width':w,'height':800});await pg.wait_for_timeout(300)
+            for i in [0,13,len(names)-1]:
+                await chips.nth(i).click();await pg.wait_for_timeout(100);sw=await ev('document.documentElement.scrollWidth');ok(f'french: no sideways scroll at {w}px (move {i})',sw<=w,str(sw))
+        # follower: her wording, her guides, her camera; in French first, then in English
+        await chips.nth(3).click();await ev('__app.seek(5)');await pg.wait_for_timeout(200);lead_cue=await pg.locator('#cue').inner_text()
+        await pg.locator('#role').select_option('f');await pg.wait_for_timeout(200)
+        ok('follower: switches and is saved',await st('role')=='f' and await ev("localStorage.getItem('bpr-role')==='f'"))
+        ok('follower: same move and count',await st('move')==3 and await st('t')==5)
+        ok('follower: her own cue',(await pg.locator('#cue').inner_text())!=lead_cue)
+        chips=pg.locator('.chip:not(.file)')
+        for i,nm in enumerate(names):
+            await chips.nth(i).click();N=await st('counts')
+            ok(f'follower {nm}: tips',await pg.locator('#dlist li').count()>0 and await pg.locator('#elist li').count()>0)
+            for c in sorted(set([1,N//2,N])):
+                await pg.locator('#beats .beat').nth(c-1).click()
+                try: await pg.wait_for_function(f"document.getElementById('count').firstChild.nodeValue==='{c}'",timeout=5000)
+                except Exception: pass
+            if await st('noLoop'): await ev('__app.seek(0)');await pg.wait_for_timeout(120)
+            if await ev('!!__engine.moves[__app.state.move].mistake'):
+                await pg.locator('#mBad').click();await pg.wait_for_timeout(100);await pg.locator('#mGood').click()
+        await chips.nth(3).click();await pg.wait_for_function('__app.state.baked',timeout=60000)
+        for v in ['you','top','pov','side']:
+            await pg.locator(f'.views button[data-v="{v}"]').click();await pg.wait_for_timeout(250)
+            im=Image.open(io.BytesIO(await pg.locator('#gl').screenshot())).convert('RGB');ok(f'follower: view {v} draws',len(im.getcolors(1<<24) or [])>300)
+        await pg.locator('#lang').select_option('en');await pg.wait_for_timeout(150)
+        ok('follower in english','give him both hands' in await pg.locator('#cue').inner_text(),await pg.locator('#cue').inner_text())
+        await chips.nth(5).click();ok('follower: move renamed',(await pg.locator('#mname').inner_text())=='His turn')
+        await pg.locator('#lang').select_option('fr');await pg.locator('#role').select_option('l');await pg.wait_for_timeout(150)
+        ok('back to leader',await st('role')=='l' and (await pg.locator('#mname').inner_text())=='Ton tour')
+        miss=await ev('[...__i18n.missing]');ok('french: nothing left in English',not miss,str(miss[:5]))
+        await pg.locator('#lang').select_option('en');await chips.nth(3).click()
+        ok('back to english',(await pg.locator('#mname').inner_text())==en_title and (await pg.locator('#mGood').inner_text())=='Good version')
         ok('no page errors',not errs,str(errs[:3]))
         await b.close()
     print(f'{n-len(fails)} of {n} checks passed');sys.exit(1 if fails else 0)

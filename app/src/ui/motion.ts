@@ -1,6 +1,7 @@
 // Real-motion mode: plays back the two dancers traced from one of your own videos (a .poses.json file made
 // by extract_poses.py) as flat figures, with tap-tempo counts, looping and mirroring.
 import { cleanMotion, tint } from "./motion-clean";
+import { tf, tr } from "../i18n";
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -70,15 +71,15 @@ export class RealMotion {
     if (this.taps.length && Math.abs(this.t - this.taps[this.taps.length - 1]) > 3) this.taps = [];
     this.taps.push(this.t);
     if (this.taps.length > 9) this.taps.shift();
-    if (this.taps.length < 3) return `Keep tapping: ${this.taps.length}…`;
+    if (this.taps.length < 3) return tf("Keep tapping: {n}…", { n: this.taps.length });
     const gap = (this.taps[this.taps.length - 1] - this.taps[0]) / (this.taps.length - 1);
-    if (gap <= 0.05) return "Keep tapping…";
+    if (gap <= 0.05) return tr("Keep tapping…");
     this.bpm = 60 / gap;
     if (!this.offset) this.offset = this.taps[0];
-    return `${Math.round(this.bpm)} BPM. Now pause on a 1 and mark it.`;
+    return tf("{n} BPM. Now pause on a 1 and mark it.", { n: Math.round(this.bpm) });
   }
   markOne(): string {
-    if (!this.bpm) return "Tap the beat first (at least 3 taps).";
+    if (!this.bpm) return tr("Tap the beat first (at least 3 taps).");
     this.offset = this.t;
     this.lastBeat = -1;
     return `${Math.round(this.bpm)} BPM, count 1 set.`;

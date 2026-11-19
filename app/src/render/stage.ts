@@ -82,12 +82,14 @@ export class Stage {
   draw(frame: Frame, guides: GuideInput, colors: StageColors) {
     const { Pl, Pf } = frame,
       mid: [number, number] = [(Pl.c[0] + Pf.c[0]) / 2, (Pl.c[1] + Pf.c[1]) / 2];
-    const head = frame.shapes.find((s) => s.t === "h" && s.lead)!;
-    this.camera.update(mid, { at: head.p as number[], yawDeg: Pl.headTh, pitch: Pl.headPitch });
+    const me = guides.who,
+      Pme = me === "l" ? Pl : Pf;
+    const head = frame.shapes.find((s) => s.t === "h" && !!s.lead === (me === "l"))!;
+    this.camera.update(mid, { at: head.p as number[], yawDeg: Pme.headTh, pitch: Pme.headPitch });
     // the light follows the couple so their shadow stays sharp wherever they travel
     this.sun.position.set(mid[0] - 1.6, 3.6, mid[1] + 2.2);
     this.sun.target.position.set(mid[0], 0, mid[1]);
-    this.figures.update(frame.shapes, this.camera.pov);
+    this.figures.update(frame.shapes, this.camera.pov ? me : null);
 
     this.floorCtx.clearRect(0, 0, this.width, this.height);
     drawFloor(this.floorCtx, this.camera, frame, guides, colors);
