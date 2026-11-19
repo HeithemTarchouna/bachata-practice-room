@@ -259,17 +259,19 @@ export class Figures {
 
   /**
    * Redraw both dancers.
-   * @param hide POV only: "l" or "f", the dancer whose head and torso are left out, because you look out of them.
+   * @param hide POV only: "l" or "f", the dancer whose eyes you look out of.
    */
   update(shapes: Shape[], hide: "l" | "f" | null) {
     this.balls.begin();
     this.tubePool.begin();
     for (const m of this.surfaces.values()) m.visible = false;
     const skirts = new Map<string, Shape[]>();
+    const eye = hide ? (shapes.find((s) => s.t === "h" && !!s.lead === (hide === "l"))?.p as V | undefined) : undefined;
     for (const s of shapes) {
       if (s.t === "x" || s.nod || s.bar || s.part === "torso") continue; // collision-only volumes; the torso is drawn as one surface instead
-      // your own skirt and thighs go too: looking down, they would cover the feet you are trying to watch
-      if (hide && !!s.lead === (hide === "l") && (s.torso || s.t === "h" || s.skirt || s.part === "thigh")) continue;
+      // POV: your own head, hair and neck are left out, because the camera sits inside them. The rest of your
+      // body stays, so looking down you see yourself: chest, skirt, legs, feet.
+      if (eye && !!s.lead === (hide === "l") && (s.t === "h" || aroundEye(s, eye))) continue;
       if (s.t === "c") this.capsule(s.a as V, s.b as V, s.wa!, s.wb!, s.col!, !!s.flat);
       else if (s.t === "o") this.ball(s.p as V, s.r!, s.col!, !!s.flat);
       else if (s.t === "h") {
@@ -287,4 +289,20 @@ export class Figures {
     this.balls.end();
     this.tubePool.end();
   }
+}
+
+/** Is this ball or limb so close to the eye point that the camera would be inside it or right against it? */
+function aroundEye(s: Shape, eye: V): boolean {
+  const NEAR = 0.13;
+  if (s.t === "o") return Math.hypot(s.p![0] - eye[0], s.p![1] - eye[1], s.p![2] - eye[2]) - s.r! < NEAR;
+  if (s.t !== "c") return false;
+  const a = s.a as V,
+    b = s.b as V,
+    d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]],
+    len2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2] || 1e-9;
+  const u = Math.min(1, Math.max(0, ((eye[0] - a[0]) * d[0] + (eye[1] - a[1]) * d[1] + (eye[2] - a[2]) * d[2]) / len2));
+  return (
+    Math.hypot(a[0] + d[0] * u - eye[0], a[1] + d[1] * u - eye[1], a[2] + d[2] * u - eye[2]) - Math.max(s.wa!, s.wb!) <
+    NEAR
+  );
 }

@@ -80,7 +80,11 @@ export class Camera {
       const f = [Math.sin(a) * Math.cos(p), -Math.sin(p), Math.cos(a) * Math.cos(p)];
       cam.fov = 92;
       cam.clearViewOffset();
-      cam.position.set(eye.at[0] + Math.sin(a) * 0.04, eye.at[1] + 0.03, eye.at[2] + Math.cos(a) * 0.04);
+      // the eyes sit in front of the middle of the head, and looking down tips the head forward: the further
+      // down you look, the further the eyes come out over your chest, which is what lets you see your own feet
+      const tip = Math.max(0, Math.sin(p)),
+        out = 0.06 + 0.15 * tip;
+      cam.position.set(eye.at[0] + Math.sin(a) * out, eye.at[1] + 0.03 - 0.05 * tip, eye.at[2] + Math.cos(a) * out);
       cam.lookAt(cam.position.x + f[0], cam.position.y + f[1], cam.position.z + f[2]);
     } else {
       const D = 3.4,

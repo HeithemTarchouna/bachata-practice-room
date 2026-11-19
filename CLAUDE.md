@@ -46,8 +46,11 @@ French for her texts is in `fr-follower.ts`. Tests fail when a count of any
 move has no follower wording or no French.
 On the stage: `GuideInput.who` picks whose footprint, hand arrow (his left /
 her right) and POV map are drawn; `Camera.who` mirrors the Side and Behind
-presets and puts POV in her eyes; `Figures.update` hides the head and torso
-of whoever is looking. `tools/views.py ... --follower` gives her six views.
+presets and puts POV in her eyes. In POV only the head, hair and neck of
+whoever is looking are hidden (`aroundEye` in `figures.ts`); the rest of the
+body stays, and the camera moves forward over the chest as you look down
+(`camera.ts`), so you see your own body and feet. The user rejected hiding
+the skirt and thighs: it "doesn't feel human". `tools/views.py ... --follower` gives her six views.
 Limits, tell the user honestly:
 - Her texts are the AI's reading of the choreography. No teacher or follower
   has checked them.
